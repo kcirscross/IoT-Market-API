@@ -1,0 +1,4680 @@
+---
+openapi: 3.0.1
+info:
+  title: IoTMarket
+  description: API Documentations for Senior Project IoTMarket
+  version: "0.1"
+servers:
+- url: https://iotmarket.herokuapp.com
+tags:
+- name: auth
+  description: API related to authenciation. The token got from using API will store in cache and on database under the field 'deviceToken'.
+- name: user
+  description: API related to user.
+- name: review
+  description: API related to review.
+- name: product
+  description: API related to products.
+- name: category
+  description: API related to categories.
+- name: subcategory
+  description: API related to subcategories.
+- name: admin
+  description: API related to admin.
+- name: store
+  description: API related to store.
+- name: shipping
+  description: API related to shipping/fee.
+- name: order
+  description: API related to order
+- name: notification
+  description: API related to notification
+paths:
+  /api/v1/auth/signin:
+    post:
+      tags:
+      - auth
+      description: Sign in.
+      parameters:
+      - name: deviceTokenFCM
+        in: header
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+            example:
+              email: hungofhydra@gmail.com
+              password: Hung9090
+        required: true
+      responses:
+        "200":
+          description: Successfully login, return user data, token.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                statusCode: 200
+                message: User logined successfully
+                data:
+                  address:
+                    street: ""
+                    district: ""
+                    ward: ""
+                    city: ""
+                  bankingAccount:
+                    bankName: ""
+                    accountOwner: ""
+                    accountNumber: ""
+                  _id: 632d51b6f9373765b2c3579c
+                  email: hungofhydra@gmail.com
+                  fullName: Nguyễn Tấn Hùng
+                  phoneNumber: "0981856405"
+                  gender: Male
+                  onlineStatus: Offline
+                  accountStatus: Active
+                  roles:
+                  - User
+                  cart: ""
+                  notifies: []
+                  orders: []
+                  products: []
+                  storeId: ""
+                  chats: []
+                  review: []
+                  tickets: []
+                  follows: []
+                  favorites: []
+                  fromGoogle: false
+                  deviceToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+                  createdAt: 2022-09-23T06:27:02.225Z
+                  updatedAt: 2022-09-23T06:27:02.225Z
+                  __v: 0
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+        "400":
+          description: Failed to login, missing either email or password
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+              example:
+                success: false
+                statusCode: 400
+                message: Please provide email and password
+        "404":
+          description: Failed to login, user not found
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+              example:
+                success: false
+                statusCode: 404
+                message: User not found
+        "401":
+          description: Failed to login, wrong password
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+              example:
+                success: false
+                statusCode: 401
+                message: Password is incorrect
+  /api/v1/auth/signup:
+    post:
+      tags:
+      - auth
+      description: Register user. This will also return token for instant login after sign up.
+      parameters:
+      - name: deviceTokenFCM
+        in: header
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegister'
+            example:
+              email: nguyentanhung10082000@gmail.com
+              password: Hung9090
+              fullName: Nguyễn Tấn Hùng
+        required: true
+      responses:
+        "200":
+          description: Successfully register, return user data, token.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                statusCode: 200
+                message: User created successfully
+                data:
+                  address:
+                    street: ""
+                    district: ""
+                    ward: ""
+                    city: ""
+                  bankingAccount:
+                    bankName: ""
+                    accountOwner: ""
+                    accountNumber: ""
+                  _id: 632d51b6f9373765b2c3579c
+                  email: nguyentanhung10082000@gmail.com
+                  fullName: Nguyễn Tấn Hùng
+                  phoneNumber: "0981856405"
+                  gender: Male
+                  onlineStatus: Offline
+                  accountStatus: Active
+                  roles:
+                  - User
+                  cart: ""
+                  notifies: []
+                  orders: []
+                  products: []
+                  storeId: ""
+                  chats: []
+                  review: []
+                  follows: []
+                  favorites: []
+                  tickets: []
+                  fromGoogle: false
+                  deviceToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+                  createdAt: 2022-09-23T06:27:02.225Z
+                  updatedAt: 2022-09-23T06:27:02.225Z
+                  __v: 0
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+        "400":
+          description: Failed to login, missing either email, password or full name
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+              example:
+                success: false
+                statusCode: 400
+                message: Please provide email, password and full name
+  /api/v1/auth/google:
+    post:
+      tags:
+      - auth
+      description: Login with google, require email and the full name of user.
+      parameters:
+      - name: deviceTokenFCM
+        in: header
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/auth_google_body'
+            example:
+              email: nguyentanhung10082000@gmail.com
+              fullName: Nguyễn Tấn Hùng
+        required: true
+      responses:
+        "200":
+          description: Successfully login via Google, return user data, token.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                statusCode: 200
+                message: User logined successfully
+                data:
+                  address:
+                    street: ""
+                    district: ""
+                    ward: ""
+                    city: ""
+                  bankingAccount:
+                    bankName: ""
+                    accountOwner: ""
+                    accountNumber: ""
+                  _id: 632d51b6f9373765b2c3579c
+                  email: nguyentanhung10082000@gmail.com
+                  fullName: Nguyễn Tấn Hùng
+                  phoneNumber: "0981856405"
+                  gender: Male
+                  onlineStatus: Offline
+                  accountStatus: Active
+                  roles:
+                  - User
+                  cart: ""
+                  follows: []
+                  favorites: []
+                  notifies: []
+                  orders: []
+                  products: []
+                  storeId: ""
+                  chats: []
+                  review: []
+                  tickets: []
+                  fromGoogle: false
+                  deviceToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+                  createdAt: 2022-09-23T06:27:02.225Z
+                  updatedAt: 2022-09-23T06:27:02.225Z
+                  __v": 0
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+        "400":
+          description: Failed to login, missing either email or full name
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+              example:
+                success: false
+                statusCode: 400
+                message: Please provide email and fullName
+  /api/v1/auth/logout:
+    post:
+      tags:
+      - auth
+      description: Logout of server, this will delete token in cache.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/auth_logout_body'
+        required: true
+      responses:
+        "200":
+          description: Successfully logout, delete token both in database and cache
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+              example:
+                message: User logged out successfully
+                success: true
+        "400":
+          description: Unsuccessfully logout, email is not provided
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+              example:
+                message: Please provide email
+                success: false
+        "404":
+          description: Unsuccessfully logout, user not found
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+              example:
+                message: User not found
+                success: false
+  /api/v1/auth/forgotpassword:
+    post:
+      tags:
+      - auth
+      description: Logout of server, this will delete token in cache.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/auth_forgotpassword_body'
+        required: true
+      responses:
+        "200":
+          description: Successfully sent email to the user cointaning link to reset password
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+              example:
+                message: Sent password request to email successfully
+        "400":
+          description: Unsucessfully sent email to the user. No email provided.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 400
+                message: Please provide email
+        "401":
+          description: Unsucessfully sent email to the user. Email is not linked to an account.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 401
+                message: The email address you entered is not connected to an account.
+  /api/v1/user/favorite/:
+    get:
+      tags:
+      - user
+      description: Get A List of Product In User Favorite List. Require Token
+      responses:
+        "200":
+          description: Get list of products successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/FavoriteList'
+              example:
+                favorites:
+                - _id: 633a4f33e738ae4b6c5f8756
+                  thumbnailImage: ""
+                  productName: Computer
+                  description: Test products
+                  categoryId: 633a4f33e738ae4b6c5f8756
+                  subcategoryId: 634fc0b38e7fea0c17c360b3
+                  detailImages:
+                  - ""
+                  video: ""
+                  weight: 1.5
+                  height: 1.5
+                  width: 1.5
+                  length: 1.5
+                  weightAfterBoxing: 3.2
+                  heightAfterBoxing: 3.2
+                  widthAfterBoxing: 3.2
+                  lengthAfterBoxing: 3.2
+                  price: "10000"
+                  numberInStock: 1
+                  updatedAt: 2022-10-03T08:43:49.283Z
+                  peopleFavoriteThisProduct:
+                  - 633a5fac38ed467fab7567ac
+                  rating: []
+                  condition: New
+                  isStore: true
+      security:
+      - bearerAuth: []
+  /api/v1/user/follow/:
+    get:
+      tags:
+      - user
+      description: Get A List of Store That User Follow. Require Token
+      responses:
+        "200":
+          description: Get list of stores successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/StoreList'
+              example:
+                follows:
+                - address:
+                    street: 38 Đội Cung
+                    district: Hòa Xuân
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  _id: 6336a9fc4e68bdee1784560b
+                  ownerId: 633a5ebd14d7108b35dd46f3
+                  displayName: TanHung Shop
+                  numberOfProduct: 0
+                  rating: 4
+                  description: Cửa hàng của Nguyễn Tấn Hùng
+                  shopImage: ""
+                  followers:
+                  - 633a5fac38ed467fab7567ac
+                  updatedAt: 2022-10-03T08:56:06.571Z
+                - address:
+                    street: 38 Đội Cung
+                    district: Hòa Xuân
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  _id: 633aa4738fa34eb344cde7af
+                  ownerId: 633a5fb638ed467fab7567b2
+                  displayName: TanHung 2 Shop
+                  numberOfProduct: 0
+                  rating: 4
+                  description: Cửa hàng của Nguyễn Tấn Hùng
+                  shopImage: ""
+                  followers:
+                  - 633a5fac38ed467fab7567ac
+                  - 633a5fac38ed467fab7567ac
+                  updatedAt: 2022-10-03T09:00:13.342Z
+      security:
+      - bearerAuth: []
+  /api/v1/user/cart/:
+    get:
+      tags:
+      - user
+      description: Get A List of Product That User Added To Cart. Require Token
+      responses:
+        "200":
+          description: Get cart list successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/CartList'
+              example:
+                cart:
+                  content:
+                  - productId:
+                      rating:
+                        ratingValue: 0
+                        ratingCount: 0
+                        oneStarCount: 0
+                        twoStarCount: 0
+                        threeStarCount: 0
+                        fourStarCount: 0
+                        fiveStarCount: 0
+                      _id: 634f62544a34d0a129f1f0f4
+                      ownerId: 633a5fac38ed467fab7567ac
+                      thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                      productName: Acer Nitro 5
+                      description: In good condition, like new
+                      categoryId: 633e44d08fee3d47b2a6274f
+                      subcategoryId: 634fc0b38e7fea0c17c360b3
+                      detailImages:
+                      - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                      - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                      video: http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                      weight: 1.5
+                      height: 1.5
+                      width: 1.5
+                      length: 1.5
+                      weightAfterBoxing: 3.2
+                      heightAfterBoxing: 3.2
+                      widthAfterBoxing: 3.2
+                      lengthAfterBoxing: 3.2
+                      price: "10000"
+                      numberInStock: 1
+                      peopleFavoriteThisProduct: []
+                      soldCount: 0
+                      condition: New
+                      isStore: true
+                      createdAt: 2022-10-19T02:35:00.539Z
+                      updatedAt: 2022-10-19T02:36:43.237Z
+                      __v: 0
+                    quantity: 1
+                    _id: 634f7b3797c2d60b8ead31cf
+                  - productId:
+                      rating:
+                        ratingValue: 0
+                        ratingCount: 0
+                        oneStarCount: 0
+                        twoStarCount: 0
+                        threeStarCount: 0
+                        fourStarCount: 0
+                        fiveStarCount: 0
+                      _id: 633e590784ead149b58a3439
+                      ownerId: 63493231e5d7c64a40323e86
+                      thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                      productName: Acer Nitro 1
+                      description: In good condition, like new
+                      categoryId: 633e44d08fee3d47b2a6274f
+                      subcategoryId: 634fc0b38e7fea0c17c360b3
+                      detailImages:
+                      - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                      - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                      video: http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                      weight: 1.5
+                      height: 1.5
+                      width: 1.5
+                      length: 1.5
+                      weightAfterBoxing: 3.2
+                      heightAfterBoxing: 3.2
+                      widthAfterBoxing: 3.2
+                      lengthAfterBoxing: 3.2
+                      price: "10000"
+                      numberInStock: 10
+                      peopleFavoriteThisProduct: []
+                      createdAt: 2022-10-06T04:26:47.212Z
+                      updatedAt: 2022-10-18T03:30:17.725Z
+                      __v: 0
+                      soldCount: 0
+                      condition: New
+                    quantity: 9
+                    _id: 634fa1617fd6aab8968ebfdf
+                  totalPrice: "100000"
+      security:
+      - bearerAuth: []
+  /api/v1/user/{userId}:
+    get:
+      tags:
+      - user
+      description: Get user info. Require user id.
+      parameters:
+      - name: userId
+        in: path
+        description: Numeric ID of the user to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 633a5fac38ed467fab7567ac
+      responses:
+        "200":
+          description: Get user info successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+              example:
+                message: Get user info successfully
+                userInfo:
+                  address:
+                    street: 38 Trần Văn Đang
+                    district: Cẩm Lệ
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  bankingAccount:
+                    bankName: MBBank
+                    accountOwner: Nguyyễn Tấn Hùng
+                    accountNumber: "0981856401"
+                  _id: 633501184a1cdc4dc25695a4
+                  email: hungofhydra@gmail.com
+                  fullName: Nguyễn Tấn Hùng
+                  phoneNumber: ""
+                  gender: Male
+                  onlineStatus: Online
+                  accountStatus: Active
+                  roles:
+                  - User
+                  cart: ""
+                  notifies: []
+                  orders: []
+                  products: []
+                  storeId: ""
+                  chats: []
+                  review: []
+                  tickets: []
+                  follows: []
+                  favorites: []
+                  fromGoogle: false
+                  createdAt: 2022-09-29T02:21:12.950Z
+                  updatedAt: 2022-09-30T07:04:12.649Z
+        "400":
+          description: Unsucessfully get user info. No userId in path
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 400
+                message: Please provide userId
+        "500":
+          description: Unsucessfully get user info. UserId is not at the right format
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 500
+                message: Cast to ObjectId failed for value \"633501184a1cdc4dc25695a\" (type string) at path \"_id\" for model \"User\"
+        "404":
+          description: Unsucessfully get user info. There is no user with the input userId.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 404
+                message: No user with id 633501184a1cdc4dc25695a2
+  /api/v1/user/buy:
+    post:
+      tags:
+      - user
+      description: Buy products in cart.
+      parameters:
+      - name: isCodQuery
+        in: query
+        description: true if the user choose to pay with COD. No input if the user choose to pay with VNPAY.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/user_buy_body'
+            example:
+            - productId: 633e590784ead149b58a3439
+              quantity: 8
+            - productId: 634383f5e39a0e4d260ac960
+              quantity: 2
+            - productId: 6344e2b39f6478d19a20160c
+              quantity: 1
+            - productId: 634f62544a34d0a129f1f0f4
+              quantity: 1
+        required: true
+      responses:
+        "200":
+          description: Send buying request successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_2'
+              example:
+                message: Buy successfully
+                order:
+                - userId: 633a5fac38ed467fab7567ac
+                  ownerId: 63493231e5d7c64a40323e86
+                  refModel: Store
+                  expected_delivery_time: 2022-10-29T23:59:59Z
+                  deliveryCode: LLGWVT
+                  productsList:
+                  - quantity: 8
+                    weight: 25600
+                    _id: 635a32dd87c0856f3baecba0
+                  - quantity: 2
+                    weight: 6.4
+                    _id: 635a32dd87c0856f3baecba1
+                  VNPay:
+                    vnp_Amount: 37151400
+                    vnp_BankCode: NCB
+                    vnp_BankTranNo: VNP13864904
+                    vnp_OrderInfo: 633a5fac38ed467fab7567ac_635a32dd87c0856f3baecb9e
+                    vnp_PayDate: 20221027142751
+                    vnp_TransactionNo: "13864904"
+                    vnp_CardType: ATM
+                    vnp_ResponseCode: 0
+                    vnp_TransactionStatus: 0
+                  _id: 635a330087c0856f3baecbbb
+                  shippingLogs: []
+                  createdAt: 2022-10-27T07:28:00.998Z
+                  updatedAt: 2022-10-27T07:28:00.998Z
+                  __v: 0
+                - userId: 633a5fac38ed467fab7567ac
+                  ownerId: 6336a9fc4e68bdee1784560b
+                  refModel: Store
+                  expected_delivery_time: 2022-10-28T23:59:59Z
+                  deliveryCode: LLGWVW
+                  productsList:
+                  - quantity: 1
+                    weight: 5.2
+                    _id: 635a32dd87c0856f3baecba3
+                  VNPay:
+                    vnp_Amount: 37151400
+                    vnp_BankCode: NCB
+                    vnp_BankTranNo: VNP13864904
+                    vnp_OrderInfo: 633a5fac38ed467fab7567ac_635a32dd87c0856f3baecb9e
+                    vnp_PayDate: 20221027142751
+                    vnp_TransactionNo: "13864904"
+                    vnp_CardType: ATM
+                    vnp_ResponseCode: 0
+                    vnp_TransactionStatus: 0
+                  _id: 635a330087c0856f3baecbb8
+                  shippingLogs: []
+                  createdAt: 2022-10-27T07:28:00.949Z
+                  updatedAt: 2022-10-27T07:28:00.949Z
+                  __v: 0
+                - userId: 633a5fac38ed467fab7567ac
+                  ownerId: 633a5fac38ed467fab7567ac
+                  refModel: User
+                  expected_delivery_time: 2022-10-28T23:59:59Z
+                  deliveryCode: LLGWVK
+                  productsList:
+                  - quantity: 1
+                    weight: 3.2
+                    _id: 635a32dd87c0856f3baecba5
+                  VNPay:
+                    vnp_Amount: 37151400
+                    vnp_BankCode: NCB
+                    vnp_BankTranNo: VNP13864904
+                    vnp_OrderInfo: 633a5fac38ed467fab7567ac_635a32dd87c0856f3baecb9e
+                    vnp_PayDate: 20221027142751
+                    vnp_TransactionNo: "13864904"
+                    vnp_CardType: ATM
+                    vnp_ResponseCode: 0
+                    vnp_TransactionStatus: 0
+                  _id: 635a330087c0856f3baecbb5
+                  shippingLogs: []
+                  createdAt: 2022-10-27T07:28:00.919Z
+                  updatedAt: 2022-10-27T07:28:00.919Z
+                  __v: 0
+      security:
+      - bearerAuth: []
+  /api/v1/user/storerequest:
+    post:
+      tags:
+      - user
+      description: Get user info. Require user id.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_storerequest_body'
+            example:
+              displayName: Tan Hung Shop
+              description: A simple electronic store located in Da Nang City.
+              shopImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+              address:
+                street: 38 Trần Văn Đang
+                district: Cẩm Lệ
+                ward: Khuê Trung
+                city: Đà Nẵng
+        required: true
+      responses:
+        "200":
+          description: Send request successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_3'
+              example:
+                message: Send request successfully
+                newRequest:
+                  requesterId: 633a5fac38ed467fab7567ac
+                  status: Pending
+                  displayName: Test Shop
+                  description: A simple store for testing API purpose
+                  shopImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  address:
+                    street: 38 Trần Văn Đang
+                    district: Cẩm Lệ
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  _id: 6344dc1583877abb5215dedd
+                  createdAt: 2022-10-11T02:59:33.523Z
+                  updatedAt: 2022-10-11T02:59:33.523Z
+                  __v: 0
+        "400":
+          description: Unsucessfully send request. User already owned store or User already sent request and is now waiting for approval.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 400
+                message: This user already has store
+      security:
+      - bearerAuth: []
+  /api/v1/user/changephone:
+    patch:
+      tags:
+      - user
+      description: User change phone number, require new phone number.  PHONE NUMBER MUST HAVE THE RIGHT FORMAT ('10' DIGITS AND STARTS WITH '0')
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_changephone_body'
+        required: true
+      responses:
+        "200":
+          description: Changed phone number successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_4'
+              example:
+                message: Changed phone number successfully
+                newPhoneNumber: "0981856405"
+        "400":
+          description: Unsucessfully change phone number. Missing phone number or phone number doesn't have the right format.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Please provide correct phone number
+      security:
+      - bearerAuth: []
+  /api/v1/user/changeonlinestatus:
+    patch:
+      tags:
+      - user
+      description: User change status. Required status
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_changeonlinestatus_body'
+        required: true
+      responses:
+        "200":
+          description: Changed online status successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_5'
+              example:
+                message: Changed status successfully
+                newOnlineStatus: Offline
+        "400":
+          description: Unsucessfully change onlune status. Missing status.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Please provide online status!
+      security:
+      - bearerAuth: []
+  /api/v1/user/changeavatar:
+    patch:
+      tags:
+      - user
+      description: User change avatar, require new avatar link. Frontend upload avatar to Firebase and use firebase link of that image for body request.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_changeavatar_body'
+        required: true
+      responses:
+        "200":
+          description: Changed avatar successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_6'
+              example:
+                message: Changed avatar successfully
+                newAvatarLink: https://www.stockvault.net//data/2013/09/14/147895/thumb16.jpg
+        "400":
+          description: Unsucessfully change avatar. Missing avatar link.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Please provide correct avatar image link!
+      security:
+      - bearerAuth: []
+  /api/v1/user/changegender:
+    patch:
+      tags:
+      - user
+      description: User change gender, require new gender. Gender should be Female/Male
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_changegender_body'
+        required: true
+      responses:
+        "200":
+          description: Changed gender successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_7'
+              example:
+                message: Changed gender successfully
+                newPhoneNumber: female
+        "400":
+          description: Unsucessfully change gender. Missing gender or gender isn't 'Male' or 'Female'
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Please provide correct gender!
+        "404":
+          description: Unsucessfully change gender. User can not be found
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: "false"
+                statusCode: 404
+                message: No user with id ...
+      security:
+      - bearerAuth: []
+  /api/v1/user/changepassword:
+    patch:
+      tags:
+      - user
+      description: User change password, require current password and new password.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_changepassword_body'
+        required: true
+      responses:
+        "200":
+          description: Changed password successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+              example:
+                message: Changed password successfully
+        "400":
+          description: Unsucessfully change password. No current password input or no new password input
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 400
+                message: Please type current password and new password!
+        "401":
+          description: Unsucessfully change password. Current password and new password is the same. Or Current password is incorrect.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              examples:
+                SamePassword:
+                  value:
+                    success: false
+                    statusCode: 401
+                    message: Current password and new password must be different, please retry!
+                WrongCurrentPassword:
+                  value:
+                    success: false
+                    statusCode: 401
+                    message: Current password is incorrect, please retry!
+        "405":
+          description: Unsucessfully change password. This user login via Google.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 405
+                message: This user registed from Google, so can not change password!
+      security:
+      - bearerAuth: []
+  /api/v1/user/changeaddress:
+    patch:
+      tags:
+      - user
+      description: User change address, require new address.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_changeaddress_body'
+        required: true
+      responses:
+        "200":
+          description: Changed address successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_8'
+              example:
+                message: Changed address successfully
+                newAddress:
+                  street: 38 Trần Văn Đang
+                  district: Cẩm Lệ
+                  ward: Khuê Trung
+                  city: Đà Nẵng
+        "400":
+          description: Unsucessfully change address. Missing input
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 400
+                message: Please input all the required address field!
+      security:
+      - bearerAuth: []
+  /api/v1/user/changebanking:
+    patch:
+      tags:
+      - user
+      description: User change banking info, require new banking info.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_changebanking_body'
+        required: true
+      responses:
+        "200":
+          description: Changed banking info successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_9'
+              example:
+                message: Changed banking info successfully
+                newBankingInfo:
+                  bankName: MBBank
+                  accountOwner: Nguyễn Tấn Hùng
+                  accountNumber: "0981856405"
+        "400":
+          description: Unsucessfully change banking info. Missing input
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 400
+                message: Please input all the required banking field!
+      security:
+      - bearerAuth: []
+  /api/v1/user/follow/{followedStoreId}:
+    patch:
+      tags:
+      - user
+      description: User follow a store, required Store ID
+      parameters:
+      - name: followedStoreId
+        in: path
+        description: Store ID to follow
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 6336a9fc4e68bdee1784560b
+      responses:
+        "200":
+          description: Followed store successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+              example:
+                message: Followed store successfully
+        "500":
+          description: Followed store unsuccessfully. Cannot find user or store.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 500
+                message: Can not store
+      security:
+      - bearerAuth: []
+  /api/v1/user/unfollow/{unfollowedStoreId}:
+    patch:
+      tags:
+      - user
+      description: User unfollow a store, required Store ID
+      parameters:
+      - name: unfollowedStoreId
+        in: path
+        description: Store ID to unfollow
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 6336a9fc4e68bdee1784560b
+      responses:
+        "200":
+          description: Unfollowed store successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+              example:
+                message: Unfollowed store successfully
+        "500":
+          description: Unfollowed store unsuccessfully. Cannot find user or store.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: false
+                statusCode: 500
+                message: Can not find store
+      security:
+      - bearerAuth: []
+  /api/v1/user/favorite/{favoriteProductId}:
+    patch:
+      tags:
+      - user
+      description: User add a product to their favorite list, required Product ID
+      parameters:
+      - name: favoriteProductId
+        in: path
+        description: Product ID to add to favorite.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 633e590784ead149b58a3439
+      responses:
+        "200":
+          description: Add to favorite list successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+              example:
+                message: Add product to favorite successfully
+      security:
+      - bearerAuth: []
+  /api/v1/user/unfavorite/{unfavoriteProductId}:
+    patch:
+      tags:
+      - user
+      description: User remove a product from their favorite list, required Product ID
+      parameters:
+      - name: unfavoriteProductId
+        in: path
+        description: Product ID to remove from favorite list.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 633e590784ead149b58a3439
+      responses:
+        "200":
+          description: Remove from favorite list successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+              example:
+                message: Remove product from favorite successfully
+      security:
+      - bearerAuth: []
+  /api/v1/user/addcart/:
+    patch:
+      tags:
+      - user
+      description: User add a product to their cart, required Product ID and quantity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_addcart_body'
+            example:
+              productId: 633e590784ead149b58a3439
+              quantity: 0
+        required: true
+      responses:
+        "200":
+          description: Add product to cart successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+              example:
+                message: Add product to cart successfully
+        "400":
+          description: Add product to cart unsuccessfully. The amount currently in cart is higher than the number of the product in stock
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+              example:
+                success: false
+                statusCode: 400
+                message: The number add to cart in higher than the number of products in stock
+      security:
+      - bearerAuth: []
+  /api/v1/user/removecart/:
+    patch:
+      tags:
+      - user
+      description: User remove a product to their cart, required Product ID and quantity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/user_addcart_body'
+            example:
+            - productId: 637344c038082acf530e2c20
+              quantity: 3
+            - productId: 6373436e38082acf530e2c07
+              quantity: 2
+            - productId: 635b5be8403c79d1fde29e85
+              quantity: 1
+        required: true
+      responses:
+        "200":
+          description: Remove product from cart successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+              example:
+                message: Remove product from cart successfully
+        "400":
+          description: Remove product to cart unsuccessfully. The amount currently in cart is higher than the number of the product in stock
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+              example:
+                success: false
+                statusCode: 400
+                message: The number of product in cart in higher than the number of products in stock
+      security:
+      - bearerAuth: []
+  /api/v1/review/user/{userId}:
+    get:
+      tags:
+      - review
+      description: Get reviews of a user. Reviews are sorted latest first.
+      parameters:
+      - name: userId
+        in: path
+        description: User ID to get review.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 633a5fac38ed467fab7567ac
+      responses:
+        "200":
+          description: Get review successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_10'
+              example:
+                message: Get reviews successfully
+                reviews:
+                - _id: 633d2b6b56efc9b54fe1897d
+                  reviewerId: 633a5fac38ed467fab7567ac
+                  productId: 633a4f33e738ae4b6c5f8756
+                  content: Sản phẩm này quá tệ
+                  starPoints: 3
+                  images: []
+                  videos:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  createdAt: 2022-10-05T06:59:55.957Z
+                  updatedAt: 2022-10-05T06:59:55.957Z
+                  __v: 0
+                - _id: 633d29f256efc9b54fe18977
+                  reviewerId: 633a5fac38ed467fab7567ac
+                  productId: 633a4f33e738ae4b6c5f8756
+                  content: Sản phẩm này quá tệ
+                  starPoints: 3
+                  images:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  videos:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  createdAt: 2022-10-05T06:53:38.412Z
+                  updatedAt: 2022-10-05T06:53:38.412Z
+                  __v: 0
+  /api/v1/review/{productId}:
+    get:
+      tags:
+      - review
+      description: Get reviews of a product. Reviews are sorted latest first.
+      parameters:
+      - name: productId
+        in: path
+        description: Product ID to get review.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 633e590784ead149b58a3439
+      responses:
+        "200":
+          description: Get review successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_10'
+              example:
+                message: Get reviews successfully
+                reviews:
+                - _id: 633d2b6b56efc9b54fe1897d
+                  reviewerId: 633a5fac38ed467fab7567ac
+                  productId: 633a4f33e738ae4b6c5f8756
+                  content: Sản phẩm này quá tệ
+                  starPoints: 3
+                  images: []
+                  videos:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  createdAt: 2022-10-05T06:59:55.957Z
+                  updatedAt: 2022-10-05T06:59:55.957Z
+                  __v: 0
+                - _id: 633d29f256efc9b54fe18977
+                  reviewerId: 633a5fac38ed467fab7567ac
+                  productId: 633a4f33e738ae4b6c5f8756
+                  content: Sản phẩm này quá tệ
+                  starPoints: 3
+                  images:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  videos:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  createdAt: 2022-10-05T06:53:38.412Z
+                  updatedAt: 2022-10-05T06:53:38.412Z
+                  __v: 0
+    post:
+      tags:
+      - review
+      description: User post a review to a product.
+      parameters:
+      - name: productId
+        in: path
+        description: Product ID to post review to.Required content of review and points.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 633e590784ead149b58a3439
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/review_productId_body'
+            example:
+              content: Sản phẩm này quá tệ
+              starPoints: 3
+              images:
+              - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+              - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+              videos:
+              - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+              - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+        required: true
+      responses:
+        "200":
+          description: Post review successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_11'
+              example:
+                message: Add review to product successfully
+                newReview:
+                  reviewerId: 633a5fac38ed467fab7567ac
+                  productId: 633a4f33e738ae4b6c5f8756
+                  content: Sản phẩm này quá tệ
+                  starPoints: 3
+                  images:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  videos:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  _id: 633d29f256efc9b54fe18977
+                  createdAt: 2022-10-05T06:53:38.412Z
+                  updatedAt: 2022-10-05T06:53:38.412Z
+                  __v: 0
+        "400":
+          description: Post review unsuccessfully, missing required field
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Missing required field
+        "404":
+          description: Post review unsuccessfully, can not find user or product
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+              example:
+                success: "false"
+                statusCode: 404
+                message: No product with id 633a4f33e738ae4b6c5f8752
+      security:
+      - bearerAuth: []
+  /api/v1/product/me:
+    get:
+      tags:
+      - product
+      description: Get all products from database of currently login User.
+      parameters:
+      - name: sortBy
+        in: query
+        description: Sort product by field. Can be empty (in this case, sort by rating). Accept value are 'pop' (rating high -> low), 'new' (newest product -> oldest product), 'sale' (highest sale product -> lowest sale product), 'pricedesc' (most expensive -> cheapest), 'priceacs' (cheapest -> most expensive)
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Get products successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_12'
+              example:
+                message: Get products successfully
+                products:
+                - _id: 633e590784ead149b58a3439
+                  ownerId: 633a5fac38ed467fab7567ac
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  price: "10000"
+                  soldCount: 0
+                  condition: New
+                  isStore: true
+                - _id: 634383f5e39a0e4d260ac960
+                  ownerId: 633a5fac38ed467fab7567ac
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  price: "100000"
+                  soldCount: 0
+                  condition: Used - Like New
+                  isStore: true
+      security:
+      - bearerAuth: []
+  /api/v1/product/user/{ownerId}:
+    get:
+      tags:
+      - product
+      description: Get all product from database according to owner Id, only return few field. Use this API for display product in menu or user dashboard.
+      parameters:
+      - name: ownerId
+        in: path
+        description: Owner ID to get products. This can be either UserId or StoreId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 633a5fac38ed467fab7567ac
+      - name: sortBy
+        in: query
+        description: Sort product by field. Can be empty (in this case, sort by rating). Accept value are 'pop' (rating high -> low), 'new' (newest product -> oldest product), 'sale' (highest sale product -> lowest sale product), 'pricedesc' (most expensive -> cheapest), 'priceacs' (cheapest -> most expensive)
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Get products successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_12'
+              example:
+                message: Get products successfully
+                products:
+                - _id: 633e590784ead149b58a3439
+                  ownerId: 633a5fac38ed467fab7567ac
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  price: "10000"
+                  soldCount: 0
+                  condition: New
+                - _id: 634383f5e39a0e4d260ac960
+                  ownerId: 633a5fac38ed467fab7567ac
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  price: "100000"
+                  soldCount: 0
+                  condition: Used - Like New
+                  isStore: true
+  /api/v1/product/category/{categoryId}:
+    get:
+      tags:
+      - product
+      description: Get all product from database according to category, only return few field. Use this API for display product in menu or user dashboard.
+      parameters:
+      - name: categoryId
+        in: path
+        description: Category ID to get products.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 633e44d08fee3d47b2a6274f
+      - name: sortBy
+        in: query
+        description: Sort product by field. Can be empty (in this case, sort by rating). Accept value are 'pop' (rating high -> low), 'new' (newest product -> oldest product), 'sale' (highest sale product -> lowest sale product), 'pricedesc' (most expensive -> cheapest), 'priceacs' (cheapest -> most expensive)
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Get products successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_12'
+              example:
+                message: Get products successfully
+                products:
+                - _id: 633e590784ead149b58a3439
+                  ownerId: 633a5fac38ed467fab7567ac
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  price: "10000"
+                  soldCount: 0
+                  condition: New
+                  isStore: true
+                - _id: 634383f5e39a0e4d260ac960
+                  ownerId: 633a5fac38ed467fab7567ac
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  price: "100000"
+                  soldCount: 0
+                  condition: Used - Like New
+                  isStore: true
+  /api/v1/product/subcategory/{subcategoryId}:
+    get:
+      tags:
+      - product
+      description: Get all product from database according to category, only return few field. Use this API for display product in menu or user dashboard.
+      parameters:
+      - name: subcategoryId
+        in: path
+        description: Subcategory ID to get products.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 634fc0b38e7fea0c17c360b3
+      - name: sortBy
+        in: query
+        description: Sort product by field. Can be empty (in this case, sort by rating). Accept value are 'pop' (rating high -> low), 'new' (newest product -> oldest product), 'sale' (highest sale product -> lowest sale product), 'pricedesc' (most expensive -> cheapest), 'priceacs' (cheapest -> most expensive)
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Get products successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_12'
+              example:
+                message: Get products successfully
+                products:
+                - _id: 633e590784ead149b58a3439
+                  ownerId: 633a5fac38ed467fab7567ac
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  price: "10000"
+                  soldCount: 0
+                  condition: New
+                  isStore: true
+                - _id: 634383f5e39a0e4d260ac960
+                  ownerId: 633a5fac38ed467fab7567ac
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  price: "100000"
+                  soldCount: 0
+                  condition: Used - Like New
+                  isStore: true
+  /api/v1/product:
+    get:
+      tags:
+      - product
+      description: Get all product from database, only return few field. Use this API for display product in menu or user dashboard.
+      parameters:
+      - name: sortBy
+        in: query
+        description: Sort product by field. Can be empty (in this case, sort by rating). Accept value are 'pop' (rating high -> low), 'new' (newest product -> oldest product), 'sale' (highest sale product -> lowest sale product), 'pricedesc' (most expensive -> cheapest), 'priceacs' (cheapest -> most expensive)
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Get products successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_12'
+              example:
+                message: Get products successfully
+                products:
+                - _id: 633e590784ead149b58a3439
+                  ownerId: 633a5fac38ed467fab7567ac
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  price: "10000"
+                  soldCount: 0
+                  condition: New
+                  isStore: true
+                - _id: 634383f5e39a0e4d260ac960
+                  ownerId: 633a5fac38ed467fab7567ac
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  price: "100000"
+                  soldCount: 0
+                  condition: Used - Like New
+                  isStore: true
+    post:
+      tags:
+      - product
+      description: Add product to database. If users use this API, ownerId will be userId. If stores use this API, ownerId will be storeId. "condition" field MUST BE ONE OF THE FOLLOWING "New", "Used - Like New", "Used - Good", "Used - Fair"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/v1_product_body'
+            example:
+              thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+              productName: Acer Nitro 5
+              description: In good condition, like new
+              categoryId: 633e44d08fee3d47b2a6274f
+              subcategoryId: 634fc0b38e7fea0c17c360b3
+              detailImages:
+              - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+              - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+              video: http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+              weight: 1.5
+              height: 1.5
+              width: 1.5
+              length: 1.5
+              weightAfterBoxing: 3.2
+              heightAfterBoxing: 3.2
+              widthAfterBoxing: 3.2
+              lengthAfterBoxing: 3.2
+              price: "10000"
+              numberInStock: 10
+              condition: New
+        required: true
+      responses:
+        "200":
+          description: Add product successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+              example:
+                message: Add product successfully
+                newProduct:
+                  ownerId: 633aa4738fa34eb344cde7af
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  description: In good condition, like new
+                  categoryId: 633e44d08fee3d47b2a6274f
+                  subcategoryId: 634fc0b38e7fea0c17c360b3
+                  detailImages:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  video: http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  weight: 1.5
+                  height: 1.5
+                  width: 1.5
+                  length: 1.5
+                  weightAfterBoxing: 3.2
+                  heightAfterBoxing: 3.2
+                  widthAfterBoxing: 3.2
+                  lengthAfterBoxing: 3.2
+                  price: "10000"
+                  numberInStock: 10
+                  rating:
+                    ratingValue: 0
+                    ratingCount: 0
+                    oneStarCount: 0
+                    twoStarCount: 0
+                    threeStarCount: 0
+                    fourStarCount: 0
+                    fiveStarCount: 0
+                  peopleFavoriteThisProduct: []
+                  soldCount: 0
+                  _id: 633e75cdd51d92e13c1a32e4
+                  condition: New
+                  isStore: true
+                  createdAt: 2022-10-06T06:29:33.217Z
+                  updatedAt: 2022-10-06T06:29:33.217Z
+                  __v: 0
+        "400":
+          description: Failed to add product, missing required field
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+              example:
+                success: false
+                statusCode: 400
+                message: Product must have...
+      security:
+      - bearerAuth: []
+  /api/v1/product/{productId}:
+    get:
+      tags:
+      - product
+      description: Get product info.
+      parameters:
+      - name: productId
+        in: path
+        description: Product ID to get info.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 634f62544a34d0a129f1f0f4
+      responses:
+        "200":
+          description: Get products successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+              example:
+                message: Get products successfully
+                product:
+                  rating:
+                    ratingValue: 0
+                    ratingCount: 0
+                    oneStarCount: 0
+                    twoStarCount: 0
+                    threeStarCount: 0
+                    fourStarCount: 0
+                    fiveStarCount: 0
+                  _id: 63439c2e9cab4d91bcb976b5
+                  ownerId: 633aa4738fa34eb344cde7af
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 10
+                  description: Old condition, need repair
+                  categoryId: 633e44d08fee3d47b2a6274f
+                  subcategoryId: 634fc0b38e7fea0c17c360b3
+                  detailImages:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  video: http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  weight: 1.5
+                  height: 1.5
+                  width: 1.5
+                  length: 1.5
+                  weightAfterBoxing: 3.2
+                  heightAfterBoxing: 3.2
+                  widthAfterBoxing: 3.2
+                  lengthAfterBoxing: 3.2
+                  price: "1000"
+                  numberInStock: 1
+                  peopleFavoriteThisProduct: []
+                  soldCount: 0
+                  condition: New
+                  isStore: true
+                  createdAt: 2022-10-10T04:14:38.468Z
+                  updatedAt: 2022-10-10T04:14:38.468Z
+                  __v: 0
+    delete:
+      tags:
+      - product
+      description: Delete product from database. The user must own the product to delete it.
+      parameters:
+      - name: productId
+        in: path
+        description: Product ID to delete it.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 634380acaa341ecbf287dfe0
+      responses:
+        "200":
+          description: Delete product successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+              example:
+                message: Updated product successfully
+                deletedProduct:
+                  ownerId: 634380acaa341ecbf287dfe0
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  description: In good condition, like new
+                  categoryId: 633e44d08fee3d47b2a6274f
+                  detailImages:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  video: http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  weight: 1.5
+                  height: 1.5
+                  width: 1.5
+                  length: 1.5
+                  weightAfterBoxing: 3.2
+                  heightAfterBoxing: 3.2
+                  widthAfterBoxing: 3.2
+                  lengthAfterBoxing: 3.2
+                  price: "10000"
+                  numberInStock: 10
+                  rating:
+                    ratingValue: 0
+                    ratingCount: 0
+                    oneStarCount: 0
+                    twoStarCount: 0
+                    threeStarCount: 0
+                    fourStarCount: 0
+                    fiveStarCount: 0
+                  peopleFavoriteThisProduct: []
+                  soldCount: 0
+                  _id: 633e75cdd51d92e13c1a32e4
+                  condition: New
+                  isStore: true
+                  createdAt: 2022-10-06T06:29:33.217Z
+                  updatedAt: 2022-10-06T06:29:33.217Z
+                  __v: 0
+        "403":
+          description: Failed to delete product, the user does not own the product.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+              example:
+                success: false
+                statusCode: 403
+                message: You can only delete your products!
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - product
+      description: Edit product to database. The user must own the product to edit it.
+      parameters:
+      - name: productId
+        in: path
+        description: Product ID to update it.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 633e590784ead149b58a3439
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/product_productId_body'
+            example:
+              thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+              productName: Acer Nitro 5
+              description: In good condition, like new
+              categoryId: 633e44d08fee3d47b2a6274f
+              subcategoryId: 634fc0b38e7fea0c17c360b3
+              detailImages:
+              - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+              - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+              video: http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+              weight: 1.5
+              height: 1.5
+              width: 1.5
+              length: 1.5
+              weightAfterBoxing: 3.2
+              heightAfterBoxing: 3.2
+              widthAfterBoxing: 3.2
+              lengthAfterBoxing: 3.2
+              price: "10000"
+              numberInStock: 10
+              condition: New
+        required: true
+      responses:
+        "200":
+          description: Edit product successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+              example:
+                message: Updated product successfully
+                newProduct:
+                  ownerId: 633aa4738fa34eb344cde7af
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 5
+                  description: In good condition, like new
+                  categoryId: 633e44d08fee3d47b2a6274f
+                  subcategoryId: 634fc0b38e7fea0c17c360b3
+                  detailImages:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  video: http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  weight: 1.5
+                  height: 1.5
+                  width: 1.5
+                  length: 1.5
+                  weightAfterBoxing: 3.2
+                  heightAfterBoxing: 3.2
+                  widthAfterBoxing: 3.2
+                  lengthAfterBoxing: 3.2
+                  price: "10000"
+                  numberInStock: 10
+                  rating:
+                    ratingValue: 0
+                    ratingCount: 0
+                    oneStarCount: 0
+                    twoStarCount: 0
+                    threeStarCount: 0
+                    fourStarCount: 0
+                    fiveStarCount: 0
+                  peopleFavoriteThisProduct: []
+                  soldCount: 0
+                  _id: 633e75cdd51d92e13c1a32e4
+                  condition: New
+                  isStore: true
+                  createdAt: 2022-10-06T06:29:33.217Z
+                  updatedAt: 2022-10-06T06:29:33.217Z
+                  __v: 0
+        "400":
+          description: Failed to edit product, missing required field
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+              example:
+                success: false
+                statusCode: 400
+                message: Product must have...
+        "403":
+          description: Failed to edit product, the user does not own the product.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+              example:
+                success: false
+                statusCode: 403
+                message: You can only edit your products!
+      security:
+      - bearerAuth: []
+  /api/v1/category:
+    get:
+      tags:
+      - category
+      description: Get all categories from database.
+      responses:
+        "200":
+          description: Get all categories successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/CategoryList'
+              example:
+                message: Get all categories successfully
+                categories:
+                - _id: 633e44d08fee3d47b2a6274f
+                  categoryName: Electronic Devices
+                  categoryDescription: Used for electronic devices such as computer, fax machine, printer, etc...
+                  numberOfGoodsInCategory: 10
+                  image: https://thumbs.dreamstime.com/b/mobile-phone-icon-smartphone-symbol-cell-205494773.jpg
+                  updatedAt: 2022-10-11T03:28:13.760Z
+                - _id: 6344e954ad3466fd98b7b823
+                  categoryName: Testing Category
+                  categoryDescription: Used for electronic devices such as computer, fax machine, printer, etc...
+                  numberOfGoodsInCategory: 10
+                  image: https://thumbs.dreamstime.com/b/mobile-phone-icon-smartphone-symbol-cell-205494773.jpg
+                  updatedAt: 2022-10-11T03:28:13.760Z
+                  createdAt: 2022-10-11T03:28:13.760Z
+    post:
+      tags:
+      - category
+      description: Get all categories from database.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/v1_category_body'
+            example:
+              categoryName: Mobile Phone
+              categoryDescription: All kinds of mobile phones
+              image: https://thumbs.dreamstime.com/b/mobile-phone-icon-smartphone-symbol-cell-205494773.jpg
+        required: true
+      responses:
+        "200":
+          description: Add new category successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/CategoryList'
+              example:
+                message: Add new categories successfully
+                newCategory:
+                  categoryName: Mobile Phone
+                  categoryDescription: All kinds of mobile phones
+                  numberOfGoodsInCategory: 0
+                  image: https://thumbs.dreamstime.com/b/mobile-phone-icon-smartphone-symbol-cell-205494773.jpg
+                  _id: 6347d28beadca91100b9ffa1
+                  createdAt: 2022-10-13T08:55:39.562Z
+                  updatedAt: 2022-10-13T08:55:39.562Z
+                  __v: 0
+        "400":
+          description: Add new category unsucessfully. Duplicate name or missing required field.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_2'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Duplicate value entered for categoryName field, please choose another value
+      security:
+      - bearerAuth: []
+  /api/v1/category/{categoryId}:
+    patch:
+      tags:
+      - category
+      description: Update category to database.
+      parameters:
+      - name: categoryId
+        in: path
+        description: Category ID to update it.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 6344e954ad3466fd98b7b823
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/category_categoryId_body'
+            example:
+              categoryName: Mobile Phone
+              categoryDescription: All kinds of mobile phones
+              image: https://thumbs.dreamstime.com/b/mobile-phone-icon-smartphone-symbol-cell-205494773.jpg
+        required: true
+      responses:
+        "200":
+          description: Edit categories successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/CategoryList'
+              example:
+                message: Edit categories successfully
+                categories:
+                - _id: 633e44d08fee3d47b2a6274f
+                  categoryName: Electronic Devices
+                  categoryDescription: Used for electronic devices such as computer, fax machine, printer, etc...
+                  numberOfGoodsInCategory: 10
+                  image: https://thumbs.dreamstime.com/b/mobile-phone-icon-smartphone-symbol-cell-205494773.jpg
+                  updatedAt: 2022-10-11T03:28:13.760Z
+                - _id: 6344e954ad3466fd98b7b823
+                  categoryName: Testing Category
+                  categoryDescription: Used for electronic devices such as computer, fax machine, printer, etc...
+                  numberOfGoodsInCategory: 10
+                  image: https://thumbs.dreamstime.com/b/mobile-phone-icon-smartphone-symbol-cell-205494773.jpg
+                  updatedAt: 2022-10-11T03:28:13.760Z
+                  createdAt: 2022-10-11T03:28:13.760Z
+        "400":
+          description: Edit categories unsuccessfully. Duplicate name or missing required field.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_2'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Duplicate value entered for categoryName field, please choose another value
+      security:
+      - bearerAuth: []
+  /api/v1/subcategory/{categoryId}:
+    get:
+      tags:
+      - subcategory
+      description: Get all subcategories of a category from database.
+      parameters:
+      - name: categoryId
+        in: path
+        description: Category ID to get subcategories from.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 6347cecb7167ccf0530ae92d
+      responses:
+        "200":
+          description: Get subcategories successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/SubcategoryList'
+              example:
+                message: Get subcategories successfully
+                subcategories:
+                - _id: 634fc1518e7fea0c17c360d3
+                  subcategoryName: Monitor DELL
+                  categoryId: 6347cecb7167ccf0530ae92d
+                  numberOfGoodsInSubcategory: 0
+                  createdAt: 2022-10-19T09:20:17.824Z
+                  updatedAt: 2022-10-19T09:20:17.824Z
+                  __v: 0
+                - _id: 634fc1598e7fea0c17c360d5
+                  subcategoryName: Monitor LENOVO
+                  categoryId: 6347cecb7167ccf0530ae92d
+                  numberOfGoodsInSubcategory: 0
+                  createdAt: 2022-10-19T09:20:25.696Z
+                  updatedAt: 2022-10-19T09:20:25.696Z
+                  __v: 0
+  /api/v1/subcategory/:
+    post:
+      tags:
+      - subcategory
+      description: Add a new subcategory to one category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/v1_subcategory_body'
+            example:
+              categoryId: 633e44d08fee3d47b2a6274f
+              subcategoryName: Headphone
+        required: true
+      responses:
+        "200":
+          description: Get subcategories successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/SubcategoryList'
+              example:
+                message: Add new subcategories successfully
+                newSubcategory:
+                  subcategoryName: Test
+                  categoryId: 633e44d08fee3d47b2a6274f
+                  numberOfGoodsInSubcategory: 0
+                  _id: 6350b653a5b667d7890c5ddc
+                  createdAt: 2022-10-20T02:45:39.104Z
+                  updatedAt: 2022-10-20T02:45:39.104Z
+                  __v: 0
+      security:
+      - bearerAuth: []
+  /api/v1/admin/reject/{storeRequestId}:
+    patch:
+      tags:
+      - admin
+      description: Decline a open store request.
+      parameters:
+      - name: storeRequestId
+        in: path
+        description: Store request ID.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 6344df4c6e500c6ab84d0095
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/reject_storeRequestId_body'
+            example:
+              reasonForReject: Do not provide enough information
+        required: true
+      responses:
+        "200":
+          description: Reject request successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/StoreRequestList'
+              example:
+                message: Reject store request successfully
+                storeRequest:
+                  address:
+                    street: 38 Trần Văn Đang
+                    district: Cẩm Lệ
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  _id: 6344df4c6e500c6ab84d0095
+                  requesterId: 633a5fac38ed467fab7567ac
+                  status: Rejected
+                  displayName: Tan Hung Shop
+                  description: A simple electronic store located in Da Nang City.
+                  shopImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  createdAt: 2022-10-11T03:13:16.184Z
+                  updatedAt: 2022-10-13T04:01:13.154Z
+                  __v: 0
+                  reasonForReject: Do not provide enough information
+        "400":
+          description: Reject request unsuccessfully. Missing input for reasonForReject.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_2'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Please provide for user your reason for declining this request
+        "404":
+          description: Reject request unsuccessfully. No pending store request with param id.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_2'
+              example:
+                success: "false"
+                statusCode: 404
+                message: No store request with id 6344df4c6e500c6ab84d0095 or the request has already been approved/decline
+      security:
+      - bearerAuth: []
+  /api/v1/admin/approve/{storeRequestId}:
+    patch:
+      tags:
+      - admin
+      description: Decline a open store request.
+      parameters:
+      - name: storeRequestId
+        in: path
+        description: Store request ID.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 6344df4c6e500c6ab84d0095
+      responses:
+        "200":
+          description: Approve request successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_13'
+              example:
+                message: Approve store request successfully
+                newStore:
+                  ownerId: 633a5fac38ed467fab7567ac
+                  displayName: Tan Hung Shop
+                  numberOfProduct: 0
+                  rating: 0
+                  followers: []
+                  description: A simple electronic store located in Da Nang City.
+                  shopImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  address:
+                    street: 38 Trần Văn Đang
+                    district: Cẩm Lệ
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  products: []
+                  _id: 6348e4cdb09a9bbd04068aa7
+                  createdAt: 2022-10-14T04:25:49.326Z
+                  updatedAt: 2022-10-14T04:25:49.326Z
+                  __v: 0
+        "400":
+          description: Reject request unsuccessfully. Missing input for reasonForReject.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_2'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Please provide for user your reason for declining this request
+        "404":
+          description: Reject request unsuccessfully. No pending store request with param id.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_2'
+              example:
+                success: "false"
+                statusCode: 404
+                message: No store request with id 6344df4c6e500c6ab84d0095 or the request has already been approved/decline
+      security:
+      - bearerAuth: []
+  /api/v1/store/activestore:
+    get:
+      tags:
+      - store
+      description: Get all active stores (stores that are not banned or deactive)
+      responses:
+        "200":
+          description: Get active stores successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/StoreList'
+              example:
+                message: Get stor successfully
+                allStores:
+                - address:
+                    street: 38 Đội Cung
+                    district: Hòa Xuân
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  _id: 6336a9fc4e68bdee1784560b
+                  ownerId: 633a5ebd14d7108b35dd46f3
+                  displayName: TanHung Shop
+                  numberOfProduct: 0
+                  rating: 4
+                  description: Cửa hàng của Nguyễn Tấn Hùng
+                  shopImage: ""
+                  followers: []
+                  updatedAt: 2022-10-05T02:44:09.453Z
+                  createdAt: 2022-10-05T02:44:09.453Z
+                  status: Active
+                - address:
+                    street: 38 Trần Văn Đang
+                    district: Cẩm Lệ
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  _id: 63493231e5d7c64a40323e86
+                  ownerId: 633a5fac38ed467fab7567ac
+                  displayName: Admin shop 1
+                  numberOfProduct: 0
+                  rating: 0
+                  followers: []
+                  description: A test shop user for admin.
+                  shopImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  products: []
+                  createdAt: 2022-10-14T09:56:01.691Z
+                  updatedAt: 2022-10-17T09:24:51.646Z
+                  __v: 0
+                  status: Active
+  /api/v1/store/report/{storeId}:
+    get:
+      tags:
+      - store
+      description: Get report about revenue of one store.
+      parameters:
+      - name: storeId
+        in: path
+        description: Store ID.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 63493231e5d7c64a40323e86
+      responses:
+        "200":
+          description: Get report successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_14'
+              example:
+                message: Get result successfully
+                revenue:
+                - _id:
+                    year: 2022
+                    month: 11
+                  total_monthly_revenue_: 3041900000
+                - _id:
+                    year: 2022
+                    month: 10
+                  total_monthly_revenue_: 3900000
+                topFiveSoldProduct:
+                - rating:
+                    ratingValue: 3.25
+                    ratingCount: 4
+                    oneStarCount: 1
+                    twoStarCount: 2
+                    threeStarCount: 0
+                    fourStarCount: 0
+                    fiveStarCount: 2
+                  _id: 634383f5e39a0e4d260ac960
+                  ownerId: 63493231e5d7c64a40323e86
+                  thumbnailImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  productName: Acer Nitro 10
+                  description: In good condition, like new
+                  categoryId: 633e44d08fee3d47b2a6274f
+                  detailImages:
+                  - https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  - http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  video: http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  weight: 1.5
+                  height: 1.5
+                  width: 1.5
+                  length: 1.5
+                  weightAfterBoxing: 3.2
+                  heightAfterBoxing: 3.2
+                  widthAfterBoxing: 3.2
+                  lengthAfterBoxing: 3.2
+                  price: "10000"
+                  numberInStock: 73
+                  peopleFavoriteThisProduct: []
+                  createdAt: 2022-10-10T02:31:17.684Z
+                  updatedAt: 2022-11-18T08:20:17.670Z
+                  __v: 0
+                  soldCount: 155
+                  condition: Used - Like New
+                  subcategoryId: 634fc0b38e7fea0c17c360b3
+                  isStore: true
+                - rating:
+                    ratingValue: 5
+                    ratingCount: 1
+                    oneStarCount: 0
+                    twoStarCount: 0
+                    threeStarCount: 0
+                    fourStarCount: 0
+                    fiveStarCount: 5
+                  _id: 637344c038082acf530e2c20
+                  ownerId: 63493231e5d7c64a40323e86
+                  thumbnailImage: https://lh3.googleusercontent.com/dclh_BpEViMKnSksWLDlc_TOGRY2e1NE2T3wnIovN2DpG7M4bqxYCJg6BJbj1z2R8IAsbUz-nlmHSrU-nPbdWeMhvLMGxiw5=w1000-rw
+                  productName: Màn hình LCD MSI MP242 (1920 x 1080/IPS/75Hz/5 ms)
+                  description: 'Tần số quét: 75Hz , Thời gian phản hồi 5 ms'
+                  categoryId: 6347cecb7167ccf0530ae92d
+                  subcategoryId: 634fc1718e7fea0c17c360e1
+                  detailImages:
+                  - https://lh3.googleusercontent.com/LXrsx9vaThxVAoB4uXQydcU-w-fg8gBWBDd_HXegTPeg8otetyBqLtgQx5SwI-KIjqk1C-TbmDAo6x8T1Pq8zm5PdUnDT7-G=w1000-rw
+                  - https://lh3.googleusercontent.com/ZbZkV0OW3PXjgWFvB32Tnl1M9ZwAf8ARputM9MXh5dMwExbilmlI12nTnOE8Ox-Jk97YpDb2VEfRhMewrOjTvMLXVlaQmw0=w1000-rw
+                  weight: 1.5
+                  height: 1.5
+                  width: 1.5
+                  length: 1.5
+                  weightAfterBoxing: 3.2
+                  heightAfterBoxing: 3.2
+                  widthAfterBoxing: 3.2
+                  lengthAfterBoxing: 3.2
+                  price: "3890000"
+                  numberInStock: 98
+                  peopleFavoriteThisProduct:
+                  - 637726709dc52fdafef5d540
+                  soldCount: 5
+                  condition: New
+                  isStore: true
+                  createdAt: 2022-11-15T07:50:24.948Z
+                  updatedAt: 2022-11-23T06:22:43.628Z
+                  __v: 0
+                - rating:
+                    ratingValue: 0
+                    ratingCount: 0
+                    oneStarCount: 0
+                    twoStarCount: 0
+                    threeStarCount: 0
+                    fourStarCount: 0
+                    fiveStarCount: 0
+                  _id: 6358e89510f22ffb6870857d
+                  ownerId: 63493231e5d7c64a40323e86
+                  thumbnailImage: https://cdn.tgdd.vn/Products/Images/44/286228/Slider/vi-vn-acer-aspire-3-a315-59-314f-i3-nxk6tsv002-1.jpg
+                  productName: Laptop Acer Aspire 3 A315 59 314F i3 1215U/8GB/256GB/Win11 (NX.K6TSV.002)
+                  description: In good condition, like new
+                  categoryId: 633e44d08fee3d47b2a6274f
+                  subcategoryId: 634fc0b38e7fea0c17c360b3
+                  detailImages:
+                  - https://cdn.tgdd.vn/Products/Images/44/286228/Slider/vi-vn-acer-aspire-3-a315-59-314f-i3-nxk6tsv002-2.jpg
+                  - https://cdn.tgdd.vn/Products/Images/44/286228/Slider/vi-vn-acer-aspire-3-a315-59-314f-i3-nxk6tsv002-3.jpg
+                  video: http://www.tutorialspoint.com/computer_fundamentals/images/personal_computer.jpg
+                  weight: 1.5
+                  height: 1.5
+                  width: 1.5
+                  length: 1.5
+                  weightAfterBoxing: 3.2
+                  heightAfterBoxing: 3.2
+                  widthAfterBoxing: 3.2
+                  lengthAfterBoxing: 3.2
+                  price: "100000"
+                  numberInStock: 8
+                  peopleFavoriteThisProduct: []
+                  soldCount: 4
+                  condition: New
+                  isStore: true
+                  createdAt: 2022-10-26T07:58:13.796Z
+                  updatedAt: 2022-11-09T03:20:01.208Z
+                  __v: 0
+                - rating:
+                    ratingValue: 0
+                    ratingCount: 0
+                    oneStarCount: 0
+                    twoStarCount: 0
+                    threeStarCount: 0
+                    fourStarCount: 0
+                    fiveStarCount: 0
+                  _id: 637344f238082acf530e2c25
+                  ownerId: 63493231e5d7c64a40323e86
+                  thumbnailImage: https://lh3.googleusercontent.com/RdDGYgZ-MRUHJKU1SxbQ-Cu6kr0MpNFzOU5MRpRz_oWig-l3cjP2sxUC66IcADg3s2dzDb4xhHlPLCcAp7-aGAqWadksKYoW=w1000-rw
+                  productName: Màn hình LCD MSI Optix G241 (1920 x 1080/IPS/144Hz/1 ms/FreeSync)
+                  description: 'Tần số quét: 144Hz , Thời gian phản hồi 5 ms'
+                  categoryId: 6347cecb7167ccf0530ae92d
+                  subcategoryId: 634fc1718e7fea0c17c360e1
+                  detailImages:
+                  - https://lh3.googleusercontent.com/Jafyh5--XApSeM4ECViLy-zpkddUIRRVp3JkeCubrrlm8sUCl5A_xgFVb5w_6XsoChDYVvNkqGwrY78gc1DVbnGBRdrP4dGC=w1000-rw
+                  - https://lh3.googleusercontent.com/f3wxh2rihcWuce4Uxxnr1Dp48-REiFBW346lo5H4kQo7izCCo75-fkdlT5YQXaGfzv7fchfHP58JqU0onYA4LwwVKdNiQVQwng=w1000-rw
+                  weight: 1.5
+                  height: 1.5
+                  width: 1.5
+                  length: 1.5
+                  weightAfterBoxing: 3.2
+                  heightAfterBoxing: 3.2
+                  widthAfterBoxing: 3.2
+                  lengthAfterBoxing: 3.2
+                  price: "3999000"
+                  numberInStock: 100
+                  peopleFavoriteThisProduct: []
+                  soldCount: 2
+                  condition: New
+                  isStore: true
+                  createdAt: 2022-11-15T07:51:14.065Z
+                  updatedAt: 2022-11-15T12:09:17.508Z
+                  __v: 0
+                - rating:
+                    ratingValue: 0
+                    ratingCount: 0
+                    oneStarCount: 0
+                    twoStarCount: 0
+                    threeStarCount: 0
+                    fourStarCount: 0
+                    fiveStarCount: 0
+                  _id: 6373448538082acf530e2c1b
+                  ownerId: 63493231e5d7c64a40323e86
+                  thumbnailImage: https://lh3.googleusercontent.com/DGp-iTG5LUA3vQXAVeD8YsdDL1_RIL3onpg-TnwKRtY1x1IdApke3JjQg44yrks2rzJ59YPRCgppCHNG685W_RHyZc-EFY8U=w1000-rw
+                  productName: Màn hình LCD MSI Optix G27C5 (1920 x 1080/VA/165Hz/1 ms/FreeSync)
+                  description: 'Tần số quét: 165Hz , Thời gian phản hồi 1 ms'
+                  categoryId: 6347cecb7167ccf0530ae92d
+                  subcategoryId: 634fc1718e7fea0c17c360e1
+                  detailImages:
+                  - https://lh3.googleusercontent.com/w-_APsZWYbyI8CE08uMfMixIIByBwd8qogCXPnK7LV_mDRUXSL21rAmPk37J3ranm8jTppBrpRBTT-WBz834_6dPW2suSPk=w1000-rw
+                  - https://lh3.googleusercontent.com/MK8stTjjej1GxqL31GDh5DdrRXQwJb87iJWPdwHqkvLlIR4Xxz_QOXnC9It7vqDo1gD5MC7FljgkkqkKVs8PWWNEWcKoyBOu=w1000-rw
+                  weight: 1.5
+                  height: 1.5
+                  width: 1.5
+                  length: 1.5
+                  weightAfterBoxing: 3.2
+                  heightAfterBoxing: 3.2
+                  widthAfterBoxing: 3.2
+                  lengthAfterBoxing: 3.2
+                  price: "5349000"
+                  numberInStock: 2
+                  peopleFavoriteThisProduct: []
+                  soldCount: 1
+                  condition: New
+                  isStore: true
+                  createdAt: 2022-11-15T07:49:25.434Z
+                  updatedAt: 2022-11-15T08:36:25.001Z
+                  __v: 0
+  /api/v1/store/{storeId}:
+    get:
+      tags:
+      - store
+      description: Get information of one store.
+      parameters:
+      - name: storeId
+        in: path
+        description: Store ID.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 63493231e5d7c64a40323e86
+      responses:
+        "200":
+          description: Get store successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_15'
+              example:
+                message: Get store successfully
+                store:
+                  address:
+                    street: 38 Trần Văn Đang
+                    district: Cẩm Lệ
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  _id: 63493231e5d7c64a40323e86
+                  ownerId: 633a5fac38ed467fab7567ac
+                  displayName: Admin shop 1
+                  numberOfProduct: 0
+                  rating: 0
+                  followers: []
+                  description: A test shop user for admin.
+                  shopImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  products: []
+                  createdAt: 2022-10-14T09:56:01.691Z
+                  updatedAt: 2022-10-17T09:24:51.646Z
+                  __v: 0
+                  status: Active
+  /api/v1/store:
+    patch:
+      tags:
+      - store
+      description: User update their own store
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/v1_store_body'
+        required: true
+      responses:
+        "200":
+          description: Update store successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_13'
+              example:
+                message: Edit store successfully
+                updatedStore:
+                  address:
+                    street: 38 Trần Văn Đang
+                    district: Cẩm Lệ
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  status: Active
+                  _id: 63493231e5d7c64a40323e86
+                  ownerId: 633a5fac38ed467fab7567ac
+                  displayName: Admin shop
+                  numberOfProduct: 0
+                  rating: 0
+                  followers: []
+                  description: A simple electronic store located in Da Nang City.
+                  shopImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  products: []
+                  createdAt: 2022-10-14T09:56:01.691Z
+                  updatedAt: 2022-10-17T06:42:04.240Z
+                  __v: 0
+        "400":
+          description: Edit store unsuccessfully. User do not own a store.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_2'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Can not update store in database or this user does not have any store
+      security:
+      - bearerAuth: []
+  /api/v1/store/deactive:
+    patch:
+      tags:
+      - store
+      description: User deactive their own store
+      responses:
+        "200":
+          description: Deactive store successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_13'
+              example:
+                message: Deactice store successfully
+                updatedStore:
+                  address:
+                    street: 38 Trần Văn Đang
+                    district: Cẩm Lệ
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  status: Deactive
+                  _id: 63493231e5d7c64a40323e86
+                  ownerId: 633a5fac38ed467fab7567ac
+                  displayName: Admin shop
+                  numberOfProduct: 0
+                  rating: 0
+                  followers: []
+                  description: A simple electronic store located in Da Nang City.
+                  shopImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  products: []
+                  createdAt: 2022-10-14T09:56:01.691Z
+                  updatedAt: 2022-10-17T06:42:04.240Z
+                  __v: 0
+        "400":
+          description: Can not active store in database because this user does not have any store or the store is currently deactive
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_2'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Can not active store in database because this user does not have any store or the store is currently deactive
+      security:
+      - bearerAuth: []
+  /api/v1/store/active:
+    patch:
+      tags:
+      - store
+      description: User active their own store
+      responses:
+        "200":
+          description: Active store successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_13'
+              example:
+                message: Active store successfully
+                updatedStore:
+                  address:
+                    street: 38 Trần Văn Đang
+                    district: Cẩm Lệ
+                    ward: Khuê Trung
+                    city: Đà Nẵng
+                  status: Deactive
+                  _id: 63493231e5d7c64a40323e86
+                  ownerId: 633a5fac38ed467fab7567ac
+                  displayName: Admin shop
+                  numberOfProduct: 0
+                  rating: 0
+                  followers: []
+                  description: A simple electronic store located in Da Nang City.
+                  shopImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+                  products: []
+                  createdAt: 2022-10-14T09:56:01.691Z
+                  updatedAt: 2022-10-17T06:42:04.240Z
+                  __v: 0
+        "400":
+          description: Can not active store in database because this user does not have any store or the store is currently active
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_2'
+              example:
+                success: "false"
+                statusCode: 400
+                message: Can not active store in database because this user does not have any store or the store is currently active
+      security:
+      - bearerAuth: []
+  /api/v1/shipping/calculate:
+    post:
+      tags:
+      - shipping
+      description: Get shipping fee and total cost of a array of product. Products with the same store will be grouped.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/user_buy_body'
+            example:
+            - productId: 633e590784ead149b58a3439
+              quantity: 8
+            - productId: 634383f5e39a0e4d260ac960
+              quantity: 2
+            - productId: 6344e2b39f6478d19a20160c
+              quantity: 1
+            - productId: 634f62544a34d0a129f1f0f4
+              quantity: 1
+        required: true
+      responses:
+        "200":
+          description: Get fee and cost successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_16'
+              example:
+                shippingFeeList:
+                - storeId: 63493231e5d7c64a40323e86
+                  shippingFee: 130514
+                  isStore: true
+                  productList:
+                  - productId: 633e590784ead149b58a3439
+                    ownerId: 63493231e5d7c64a40323e86
+                    weight: 25600
+                    height: 3.2
+                    length: 3.2
+                    width: 3.2
+                    quantity: 8
+                    isStore: true
+                  - productId: 634383f5e39a0e4d260ac960
+                    ownerId: 63493231e5d7c64a40323e86
+                    weight: 6.4
+                    height: 3.2
+                    length: 3.2
+                    width: 3.2
+                    quantity: 2
+                    isStore: true
+                - storeId: 6336a9fc4e68bdee1784560b
+                  shippingFee: 15500
+                  isStore: true
+                  productList:
+                  - productId: 6344e2b39f6478d19a20160c
+                    ownerId: 6336a9fc4e68bdee1784560b
+                    weight: 5.2
+                    height: 3.2
+                    length: 3.2
+                    width: 3.2
+                    quantity: 1
+                    isStore: true
+                - storeId: 633a5fac38ed467fab7567ac
+                  shippingFee: 15500
+                  isStore: false
+                  productList:
+                  - productId: 634f62544a34d0a129f1f0f4
+                    ownerId: 633a5fac38ed467fab7567ac
+                    weight: 3.2
+                    height: 3.2
+                    length: 3.2
+                    width: 3.2
+                    quantity: 1
+                    isStore: false
+                totalShippingFee: 161514
+                totalProductCost: 210000
+      security:
+      - bearerAuth: []
+  /api/v1/order/buyer:
+    get:
+      tags:
+      - order
+      description: Get orders that this user bought. The orders are sorted from newest to oldest.
+      responses:
+        "200":
+          description: Get orders successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/OrderList'
+              example:
+                orders:
+                - _id: 635f6996c6a2422a268ebbcc
+                  userId: 633a5fac38ed467fab7567ac
+                  ownerId: 633a5fac38ed467fab7567ac
+                  refModel: User
+                  expected_delivery_time: 2022-11-01T23:59:59Z
+                  deliveryCode: LLGH99
+                  isCod: true
+                  productsList:
+                  - name: 634f62544a34d0a129f1f0f4
+                    quantity: 1
+                    weight: 3
+                    _id: 635f6996c6a2422a268ebbcd
+                  shippingLogs: []
+                  createdAt: 2022-10-31T06:22:14.524Z
+                  updatedAt: 2022-10-31T06:22:14.524Z
+                  __v: 0
+                - _id: 635f6996c6a2422a268ebbc9
+                  userId: 633a5fac38ed467fab7567ac
+                  ownerId: 6336a9fc4e68bdee1784560b
+                  refModel: Store
+                  expected_delivery_time: 2022-11-01T23:59:59Z
+                  deliveryCode: LLGH9V
+                  isCod: true
+                  productsList:
+                  - name: 6344e2b39f6478d19a20160c
+                    quantity: 1
+                    weight: 5
+                    _id: 635f6996c6a2422a268ebbca
+                  shippingLogs: []
+                  createdAt: 2022-10-31T06:22:14.514Z
+                  updatedAt: 2022-10-31T06:22:14.514Z
+                  __v: 0
+                - _id: 635f6996c6a2422a268ebbc5
+                  userId: 633a5fac38ed467fab7567ac
+                  ownerId: 63493231e5d7c64a40323e86
+                  refModel: Store
+                  expected_delivery_time: 2022-11-02T23:59:59Z
+                  deliveryCode: LLGH9C
+                  isCod: true
+                  productsList:
+                  - name: 633e590784ead149b58a3439
+                    quantity: 8
+                    weight: 25600
+                    _id: 635f6996c6a2422a268ebbc6
+                  - name: 634383f5e39a0e4d260ac960
+                    quantity: 2
+                    weight: 6
+                    _id: 635f6996c6a2422a268ebbc7
+                  shippingLogs:
+                  - status: cancel
+                    updated_date: 2022-10-31T06:53:32.344Z
+                    _id: 635f8cee4aecd7438a38d010
+                  createdAt: 2022-10-31T06:22:14.501Z
+                  updatedAt: 2022-10-31T08:53:02.983Z
+                  __v: 7
+      security:
+      - bearerAuth: []
+  /api/v1/order/seller:
+    get:
+      tags:
+      - order
+      description: Get orders that this user sold to others. The orders are sorted from newest to oldest.
+      responses:
+        "200":
+          description: Get orders successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/OrderList'
+              example:
+                orders:
+                - _id: 635f6996c6a2422a268ebbcc
+                  userId: 633a5fac38ed467fab7567ac
+                  ownerId: 633a5fac38ed467fab7567ac
+                  refModel: User
+                  expected_delivery_time: 2022-11-01T23:59:59Z
+                  deliveryCode: LLGH99
+                  isCod: true
+                  productsList:
+                  - name: 634f62544a34d0a129f1f0f4
+                    quantity: 1
+                    weight: 3
+                    _id: 635f6996c6a2422a268ebbcd
+                  shippingLogs: []
+                  createdAt: 2022-10-31T06:22:14.524Z
+                  updatedAt: 2022-10-31T06:22:14.524Z
+                  __v: 0
+                - _id: 635f6996c6a2422a268ebbc9
+                  userId: 633a5fac38ed467fab7567ac
+                  ownerId: 6336a9fc4e68bdee1784560b
+                  refModel: Store
+                  expected_delivery_time: 2022-11-01T23:59:59Z
+                  deliveryCode: LLGH9V
+                  isCod: true
+                  productsList:
+                  - name: 6344e2b39f6478d19a20160c
+                    quantity: 1
+                    weight: 5
+                    _id: 635f6996c6a2422a268ebbca
+                  shippingLogs: []
+                  createdAt: 2022-10-31T06:22:14.514Z
+                  updatedAt: 2022-10-31T06:22:14.514Z
+                  __v: 0
+                - _id: 635f6996c6a2422a268ebbc5
+                  userId: 633a5fac38ed467fab7567ac
+                  ownerId: 63493231e5d7c64a40323e86
+                  refModel: Store
+                  expected_delivery_time: 2022-11-02T23:59:59Z
+                  deliveryCode: LLGH9C
+                  isCod: true
+                  productsList:
+                  - name: 633e590784ead149b58a3439
+                    quantity: 8
+                    weight: 25600
+                    _id: 635f6996c6a2422a268ebbc6
+                  - name: 634383f5e39a0e4d260ac960
+                    quantity: 2
+                    weight: 6
+                    _id: 635f6996c6a2422a268ebbc7
+                  shippingLogs:
+                  - status: cancel
+                    updated_date: 2022-10-31T06:53:32.344Z
+                    _id: 635f8cee4aecd7438a38d010
+                  createdAt: 2022-10-31T06:22:14.501Z
+                  updatedAt: 2022-10-31T08:53:02.983Z
+                  __v: 7
+      security:
+      - bearerAuth: []
+  /api/v1/order/detail/{orderId}:
+    get:
+      tags:
+      - order
+      description: Get details of one orders. Shipping log automatically updated.
+      parameters:
+      - name: orderId
+        in: path
+        description: Order ID.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 63493231e5d7c64a40323e86
+      responses:
+        "200":
+          description: Get orders successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+              example:
+                order:
+                  _id: 635f6996c6a2422a268ebbc5
+                  userId: 633a5fac38ed467fab7567ac
+                  ownerId: 63493231e5d7c64a40323e86
+                  refModel: Store
+                  expected_delivery_time: 2022-11-02T23:59:59Z
+                  deliveryCode: LLGH9C
+                  isCod: true
+                  productsList:
+                  - name: 633e590784ead149b58a3439
+                    quantity: 8
+                    weight: 25600
+                    _id: 635f6996c6a2422a268ebbc6
+                  - name: 634383f5e39a0e4d260ac960
+                    quantity: 2
+                    weight: 6
+                    _id: 635f6996c6a2422a268ebbc7
+                  shippingLogs:
+                  - status: cancel
+                    updated_date: 2022-10-31T06:53:32.344Z
+                    _id: 635f91934aecd7438a38d02d
+                  createdAt: 2022-10-31T06:22:14.501Z
+                  updatedAt: 2022-10-31T09:12:51.698Z
+                  __v: 8
+      security:
+      - bearerAuth: []
+  /api/v1/order:
+    get:
+      tags:
+      - order
+      description: Get all orders. For Admin.
+      responses:
+        "200":
+          description: Get orders successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+              example:
+                order:
+                  _id: 635f6996c6a2422a268ebbc5
+                  userId: 633a5fac38ed467fab7567ac
+                  ownerId: 63493231e5d7c64a40323e86
+                  refModel: Store
+                  expected_delivery_time: 2022-11-02T23:59:59Z
+                  deliveryCode: LLGH9C
+                  isCod: true
+                  productsList:
+                  - name: 633e590784ead149b58a3439
+                    quantity: 8
+                    weight: 25600
+                    _id: 635f6996c6a2422a268ebbc6
+                  - name: 634383f5e39a0e4d260ac960
+                    quantity: 2
+                    weight: 6
+                    _id: 635f6996c6a2422a268ebbc7
+                  shippingLogs:
+                  - status: cancel
+                    updated_date: 2022-10-31T06:53:32.344Z
+                    _id: 635f91934aecd7438a38d02d
+                  createdAt: 2022-10-31T06:22:14.501Z
+                  updatedAt: 2022-10-31T09:12:51.698Z
+                  __v: 8
+      security:
+      - bearerAuth: []
+  /api/v1/order/receive/{orderId}:
+    post:
+      tags:
+      - order
+      description: Receive order successfully.
+      parameters:
+      - name: orderId
+        in: path
+        description: Order ID.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 63493231e5d7c64a40323e86
+      responses:
+        "200":
+          description: Set order to receive status successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+              example:
+                message: Set order to receive status successfully
+      security:
+      - bearerAuth: []
+  /api/v1/noti:
+    get:
+      tags:
+      - notification
+      description: Get notification of a user.
+      responses:
+        "200":
+          description: Get notification successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+              example:
+                message: Get notification successfully
+                notifications:
+                - _id: 6361e250d3e6985b248807f8
+                  toUserId: 633a5fac38ed467fab7567ac
+                  deviceTokenFCM: fPehXMvoSBGCuHZ3mMTWwU:APA91bEDKrD_AVliALgF4w0lXlgdcn1DGtuksnbd4gEkEzhxq6ODdx-2na8qgyYWBBIH4sAus_WTU-_derBjsWIX5qnm57YQqQ9K3RjpIOi71WxrEqgWzKGUawWsYT5aBcGAlVX6Mb5c
+                  isRead: false
+                  title: New orders
+                  body: Your store got new orders! Please check now!
+                  createdAt: 2022-11-02T03:21:52.260Z
+                  updatedAt: 2022-11-02T03:21:52.260Z
+                  __v: 0
+                - _id: 6361e250d3e6985b248807fa
+                  toUserId: 633a5fac38ed467fab7567ac
+                  deviceTokenFCM: fPehXMvoSBGCuHZ3mMTWwU:APA91bEDKrD_AVliALgF4w0lXlgdcn1DGtuksnbd4gEkEzhxq6ODdx-2na8qgyYWBBIH4sAus_WTU-_derBjsWIX5qnm57YQqQ9K3RjpIOi71WxrEqgWzKGUawWsYT5aBcGAlVX6Mb5c
+                  isRead: false
+                  title: New orders
+                  body: Your store got new orders! Please check now!
+                  createdAt: 2022-11-02T03:21:52.314Z
+                  updatedAt: 2022-11-02T03:21:52.314Z
+                  __v: 0
+      security:
+      - bearerAuth: []
+  /api/v1/noti/{notificationId}:
+    post:
+      tags:
+      - notification
+      description: Set notification status from unread to read.
+      parameters:
+      - name: notificationId
+        in: path
+        description: Notification ID.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 63493231e5d7c64a40323e86
+      responses:
+        "200":
+          description: Get orders successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+              example:
+                message: Set read successfully
+components:
+  schemas:
+    UserLogin:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      properties:
+        statusCode:
+          type: number
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/LoginResponse_data'
+    UserRegister:
+      required:
+      - email
+      - fullName
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        fullName:
+          type: string
+      example:
+        email: nguyentanhung10082000@gmail.com
+        password: Hung9090
+        fullName: Nguyễn Tấn Hùng
+    UserInfo:
+      type: object
+      properties:
+        message:
+          type: string
+        userInfo:
+          $ref: '#/components/schemas/UserInfo_userInfo'
+    FavoriteList:
+      type: object
+      properties:
+        favorites:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteList_favorites'
+    StoreList:
+      type: object
+      properties:
+        follows:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreList_follows'
+    CartList:
+      type: object
+      properties:
+        cart:
+          $ref: '#/components/schemas/CartList_cart'
+    ProductList:
+      type: object
+      properties:
+        message:
+          type: string
+        newProduct:
+          $ref: '#/components/schemas/ProductList_newProduct'
+    CategoryList:
+      type: object
+      properties:
+        message:
+          type: string
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryList_categories'
+    SubcategoryList:
+      type: object
+      properties:
+        message:
+          type: string
+        subcategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubcategoryList_subcategories'
+    StoreRequestList:
+      type: object
+      properties:
+        message:
+          type: string
+        storeRequest:
+          $ref: '#/components/schemas/StoreRequestList_storeRequest'
+    OrderList:
+      type: object
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderList_orders'
+    OrderDetail:
+      type: object
+      properties:
+        order:
+          $ref: '#/components/schemas/OrderDetail_order'
+    NotificationList:
+      type: object
+      properties:
+        message:
+          type: string
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationList_notifications'
+    inline_response_400:
+      type: object
+      properties:
+        success:
+          type: string
+        statusCode:
+          type: integer
+        message:
+          type: string
+    auth_google_body:
+      required:
+      - email
+      - fullName
+      type: object
+      properties:
+        email:
+          type: string
+        fullName:
+          type: string
+    auth_logout_body:
+      required:
+      - email
+      type: object
+      properties:
+        email:
+          type: string
+      example:
+        email: hungofhydra@gmail.com
+    inline_response_200:
+      type: object
+      properties:
+        message:
+          type: string
+        success:
+          type: boolean
+    auth_forgotpassword_body:
+      required:
+      - email
+      type: object
+      properties:
+        email:
+          type: string
+      example:
+        email: hungofhydra@gmail.com
+    inline_response_200_1:
+      type: object
+      properties:
+        message:
+          type: string
+    inline_response_400_1:
+      type: object
+      properties:
+        message:
+          type: string
+        success:
+          type: boolean
+        statusCode:
+          type: integer
+    user_buy_body:
+      type: object
+      properties:
+        productId:
+          type: string
+        quantity:
+          type: number
+    inline_response_200_2:
+      type: object
+      properties:
+        message:
+          type: string
+        order:
+          type: array
+          items:
+            $ref: '#/components/schemas/inline_response_200_2_order'
+    apiv1userstorerequest_address:
+      type: object
+      properties:
+        street:
+          type: string
+        district:
+          type: string
+        ward:
+          type: string
+        city:
+          type: string
+    user_storerequest_body:
+      required:
+      - address
+      - description
+      - displayName
+      type: object
+      properties:
+        displayName:
+          type: string
+        description:
+          type: string
+        shopImage:
+          type: string
+        address:
+          $ref: '#/components/schemas/apiv1userstorerequest_address'
+    inline_response_200_3:
+      type: object
+      properties:
+        message:
+          type: string
+        newRequest:
+          $ref: '#/components/schemas/inline_response_200_3_newRequest'
+    user_changephone_body:
+      required:
+      - phoneNumber
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+      example:
+        phoneNumber: "0981856405"
+    inline_response_200_4:
+      type: object
+      properties:
+        message:
+          type: string
+        newPhoneNumber:
+          type: string
+    user_changeonlinestatus_body:
+      required:
+      - status
+      type: object
+      properties:
+        status:
+          type: string
+      example:
+        status: Offline
+    inline_response_200_5:
+      type: object
+      properties:
+        message:
+          type: string
+        newOnlineStatus:
+          type: string
+    user_changeavatar_body:
+      required:
+      - avatarLink
+      type: object
+      properties:
+        avatarLink:
+          type: string
+      example:
+        avatarLink: https://www.stockvault.net//data/2013/09/14/147895/thumb16.jpg
+    inline_response_200_6:
+      type: object
+      properties:
+        message:
+          type: string
+        newAvatarLink:
+          type: string
+    user_changegender_body:
+      required:
+      - gender
+      type: object
+      properties:
+        gender:
+          type: string
+      example:
+        gender: female
+    inline_response_200_7:
+      type: object
+      properties:
+        message:
+          type: string
+        newGender:
+          type: string
+    user_changepassword_body:
+      required:
+      - currentPassword
+      - newPassword
+      type: object
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+      example:
+        currentPassword: nguyentanhung
+        newPassword: Hung9090
+    user_changeaddress_body:
+      required:
+      - city
+      - district
+      - street
+      - ward
+      type: object
+      properties:
+        street:
+          type: string
+        district:
+          type: string
+        ward:
+          type: string
+        city:
+          type: string
+      example:
+        street: 38 Trần Văn Đang
+        district: Cẩm Lệ
+        ward: Khuê Trung
+        city: Đà Nẵng
+    inline_response_200_8:
+      type: object
+      properties:
+        message:
+          type: string
+        newAddress:
+          $ref: '#/components/schemas/apiv1userstorerequest_address'
+    user_changebanking_body:
+      required:
+      - accountNumber
+      - accountOwner
+      - bankName
+      type: object
+      properties:
+        bankName:
+          type: string
+        accountOwner:
+          type: string
+        accountNumber:
+          type: string
+      example:
+        bankName: MBBank
+        accountOwner: Nguyễn Tấn Hùng
+        accountNumber: "0981856405"
+    inline_response_200_9:
+      type: object
+      properties:
+        message:
+          type: string
+        newBankingInfo:
+          $ref: '#/components/schemas/LoginResponse_data_bankingAccount'
+    user_addcart_body:
+      required:
+      - productId
+      - quantity
+      type: object
+      properties:
+        productId:
+          type: string
+        quantity:
+          type: number
+    inline_response_200_10:
+      type: object
+      properties:
+        message:
+          type: string
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/inline_response_200_10_reviews'
+    review_productId_body:
+      required:
+      - content
+      - starPoints
+      type: object
+      properties:
+        content:
+          type: string
+        starPoints:
+          type: number
+        images:
+          type: array
+          items:
+            type: string
+        videos:
+          type: array
+          items:
+            type: string
+    inline_response_200_11:
+      type: object
+      properties:
+        message:
+          type: string
+        newReview:
+          $ref: '#/components/schemas/inline_response_200_11_newReview'
+    inline_response_200_12:
+      type: object
+      properties:
+        message:
+          type: string
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/inline_response_200_12_products'
+    v1_product_body:
+      required:
+      - categoryId
+      - condition
+      - description
+      - height
+      - heightAfterBoxing
+      - length
+      - lengthAfterBoxing
+      - numberInStock
+      - price
+      - productName
+      - subcategoryId
+      - thumbnailImage
+      - weight
+      - weightAfterBoxing
+      - width
+      - widthAfterBoxing
+      type: object
+      properties:
+        thumbnailImage:
+          type: string
+        productName:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: string
+        subcategoryId:
+          type: string
+        detailImages:
+          type: array
+          items:
+            type: string
+        video:
+          type: string
+        weight:
+          type: number
+        height:
+          type: number
+        width:
+          type: number
+        length:
+          type: number
+        weightAfterBoxing:
+          type: number
+        heightAfterBoxing:
+          type: number
+        widthAfterBoxing:
+          type: number
+        lengthAfterBoxing:
+          type: number
+        price:
+          type: string
+        numberInStock:
+          type: number
+        condition:
+          type: string
+          enum:
+          - New
+          - Used - Like New
+          - Used - Good
+          - Used - Fair
+    product_productId_body:
+      type: object
+      properties:
+        thumbnailImage:
+          type: string
+        productName:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: string
+        subcategoryId:
+          type: string
+        detailImages:
+          type: array
+          items:
+            type: string
+        video:
+          type: string
+        weight:
+          type: number
+        height:
+          type: number
+        width:
+          type: number
+        length:
+          type: number
+        weightAfterBoxing:
+          type: number
+        heightAfterBoxing:
+          type: number
+        widthAfterBoxing:
+          type: number
+        lengthAfterBoxing:
+          type: number
+        price:
+          type: string
+        numberInStock:
+          type: number
+        condition:
+          type: string
+    v1_category_body:
+      required:
+      - categoryDescription
+      - categoryName
+      - image
+      type: object
+      properties:
+        categoryName:
+          type: string
+        categoryDescription:
+          type: string
+        image:
+          type: string
+    inline_response_400_2:
+      type: object
+      properties:
+        success:
+          type: string
+        statusCode:
+          type: number
+        message:
+          type: string
+    category_categoryId_body:
+      type: object
+      properties:
+        categoryName:
+          type: string
+        categoryDescription:
+          type: string
+        image:
+          type: string
+    v1_subcategory_body:
+      required:
+      - categoryId
+      - subcategoryName
+      type: object
+      properties:
+        categoryId:
+          type: string
+        subcategoryName:
+          type: string
+    reject_storeRequestId_body:
+      required:
+      - reasonForReject
+      type: object
+      properties:
+        reasonForReject:
+          type: string
+    inline_response_200_13:
+      type: object
+      properties:
+        message:
+          type: string
+        newStore:
+          $ref: '#/components/schemas/inline_response_200_13_newStore'
+    inline_response_200_14:
+      type: object
+      properties:
+        message:
+          type: string
+        revenue:
+          type: array
+          items:
+            $ref: '#/components/schemas/inline_response_200_14_revenue'
+        topFiveSoldProduct:
+          type: array
+          items:
+            $ref: '#/components/schemas/inline_response_200_14_topFiveSoldProduct'
+    inline_response_200_15:
+      type: object
+      properties:
+        message:
+          type: string
+        store:
+          $ref: '#/components/schemas/inline_response_200_15_store'
+    v1_store_body:
+      type: object
+      properties:
+        displayName:
+          type: string
+        description:
+          type: string
+        shopImage:
+          type: string
+        address:
+          $ref: '#/components/schemas/apiv1userstorerequest_address'
+        status:
+          type: string
+      example:
+        displayName: Admin shop
+        description: A simple electronic store located in Da Nang City.
+        shopImage: https://cdn.britannica.com/77/170477-050-1C747EE3/Laptop-computer.jpg
+        address:
+          street: 38 Trần Văn Đang
+          district: Cẩm Lệ
+          ward: Khuê Trung
+          city: Đà Nẵng
+        status: Active
+    inline_response_200_16:
+      type: object
+      properties:
+        shippingFeeList:
+          type: array
+          items:
+            $ref: '#/components/schemas/inline_response_200_16_shippingFeeList'
+        totalShippingFee:
+          type: number
+        totalProductCost:
+          type: number
+    LoginResponse_data_bankingAccount:
+      type: object
+      properties:
+        bankName:
+          type: string
+        accountOwner:
+          type: string
+        accountNumber:
+          type: string
+    LoginResponse_data:
+      type: object
+      properties:
+        deviceToken:
+          type: string
+        address:
+          $ref: '#/components/schemas/apiv1userstorerequest_address'
+        bankingAccount:
+          $ref: '#/components/schemas/LoginResponse_data_bankingAccount'
+        _id:
+          type: string
+        email:
+          type: string
+        fullName:
+          type: string
+        phoneNumber:
+          type: string
+        gender:
+          type: string
+        onlineStatus:
+          type: string
+        accountStatus:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        cart:
+          type: string
+        notifies:
+          type: array
+          items:
+            type: string
+        orders:
+          type: array
+          items:
+            type: string
+        products:
+          type: array
+          items:
+            type: string
+        follows:
+          type: array
+          items:
+            type: string
+        favorites:
+          type: array
+          items:
+            type: string
+        storeId:
+          type: string
+        chats:
+          type: array
+          items:
+            type: object
+        tickets:
+          type: array
+          items:
+            type: object
+        fromGoogle:
+          type: boolean
+    UserInfo_userInfo:
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/apiv1userstorerequest_address'
+        bankingAccount:
+          $ref: '#/components/schemas/LoginResponse_data_bankingAccount'
+        _id:
+          type: string
+        email:
+          type: string
+        fullName:
+          type: string
+        phoneNumber:
+          type: string
+        gender:
+          type: string
+        onlineStatus:
+          type: string
+        accountStatus:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        cart:
+          type: string
+        notifies:
+          type: array
+          items:
+            type: string
+        orders:
+          type: array
+          items:
+            type: string
+        products:
+          type: array
+          items:
+            type: string
+        follows:
+          type: array
+          items:
+            type: string
+        favorites:
+          type: array
+          items:
+            type: string
+        storeId:
+          type: string
+        chats:
+          type: array
+          items:
+            type: object
+        tickets:
+          type: array
+          items:
+            type: object
+        fromGoogle:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    FavoriteList_favorites:
+      type: object
+      properties:
+        _id:
+          type: string
+        thumbnailImage:
+          type: string
+        productName:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: string
+        subcategoryId:
+          type: string
+        detailImages:
+          type: array
+          items:
+            type: string
+        video:
+          type: string
+        weight:
+          type: number
+        height:
+          type: number
+        width:
+          type: number
+        length:
+          type: number
+        weightAfterBoxing:
+          type: number
+        heightAfterBoxing:
+          type: number
+        widthAfterBoxing:
+          type: number
+        lengthAfterBoxing:
+          type: number
+        price:
+          type: string
+        numberInStock:
+          type: number
+        updatedAt:
+          type: string
+        peopleFavoriteThisProduct:
+          type: array
+          items:
+            type: string
+        rating:
+          type: array
+          items:
+            type: object
+        condition:
+          type: string
+        isStore:
+          type: boolean
+    StoreList_follows:
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/apiv1userstorerequest_address'
+        _id:
+          type: string
+        ownerId:
+          type: string
+        displayName:
+          type: string
+        numberOfProduct:
+          type: number
+        rating:
+          type: number
+        description:
+          type: string
+        shopImage:
+          type: string
+        followers:
+          type: array
+          items:
+            type: string
+        updatedAt:
+          type: string
+    CartList_cart_productId_rating:
+      type: object
+      properties:
+        ratingValue:
+          type: number
+        ratingCount:
+          type: number
+        oneStarCount:
+          type: number
+        twoStarCount:
+          type: number
+        threeStarCount:
+          type: number
+        fourStarCount:
+          type: number
+        fiveStarCount:
+          type: number
+    CartList_cart_productId:
+      type: object
+      properties:
+        rating:
+          $ref: '#/components/schemas/CartList_cart_productId_rating'
+        _id:
+          type: string
+        ownerId:
+          type: string
+        thumbnailImage:
+          type: string
+        productName:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: string
+        subcategoryId:
+          type: string
+        detailImages:
+          type: array
+          items:
+            type: string
+        video:
+          type: string
+        weight:
+          type: number
+        height:
+          type: number
+        width:
+          type: number
+        length:
+          type: number
+        weightAfterBoxing:
+          type: number
+        heightAfterBoxing:
+          type: number
+        widthAfterBoxing:
+          type: number
+        lengthAfterBoxing:
+          type: number
+        price:
+          type: string
+        numberInStock:
+          type: number
+        peopleFavoriteThisProduct:
+          type: array
+          items:
+            type: object
+        soldCount:
+          type: number
+        condition:
+          type: string
+        isStore:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    CartList_cart_content:
+      type: object
+      properties:
+        productId:
+          $ref: '#/components/schemas/CartList_cart_productId'
+        quantity:
+          type: number
+        _id:
+          type: string
+    CartList_cart:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartList_cart_content'
+        totalPrice:
+          type: string
+    ProductList_newProduct:
+      type: object
+      properties:
+        ownerId:
+          type: string
+        thumbnailImage:
+          type: string
+        productName:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: string
+        subcategoryId:
+          type: string
+        detailImages:
+          type: array
+          items:
+            type: string
+        video:
+          type: string
+        weight:
+          type: number
+        height:
+          type: number
+        width:
+          type: number
+        length:
+          type: number
+        weightAfterBoxing:
+          type: number
+        heightAfterBoxing:
+          type: number
+        widthAfterBoxing:
+          type: number
+        lengthAfterBoxing:
+          type: number
+        price:
+          type: string
+        numberInStock:
+          type: number
+        rating:
+          $ref: '#/components/schemas/CartList_cart_productId_rating'
+        peopleFavoriteThisProduct:
+          type: array
+          items:
+            type: object
+        soldCount:
+          type: number
+        _id:
+          type: string
+        condition:
+          type: string
+        isStore:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    CategoryList_categories:
+      type: object
+      properties:
+        _id:
+          type: string
+        categoryName:
+          type: string
+        categoryDescription:
+          type: string
+        numberOfGoodsInCategory:
+          type: number
+        image:
+          type: string
+        updatedAt:
+          type: string
+        createdAt:
+          type: string
+    SubcategoryList_subcategories:
+      type: object
+      properties:
+        _id:
+          type: string
+        subcategoryName:
+          type: string
+        categoryId:
+          type: string
+        numberOfGoodsInSubcategory:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    StoreRequestList_storeRequest:
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/apiv1userstorerequest_address'
+        _id:
+          type: string
+        requesterId:
+          type: string
+        status:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        shopImage:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    OrderList_productsList:
+      type: object
+      properties:
+        name:
+          type: string
+        quantity:
+          type: number
+        weight:
+          type: number
+        _id:
+          type: string
+    OrderList_orders:
+      type: object
+      properties:
+        _id:
+          type: string
+        userId:
+          type: string
+        ownerId:
+          type: string
+        refModel:
+          type: string
+        expected_delivery_time:
+          type: string
+        deliveryCode:
+          type: string
+        isCod:
+          type: boolean
+        productsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderList_productsList'
+        shippingLogs:
+          type: array
+          items:
+            type: object
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    OrderDetail_order_shippingLogs:
+      type: object
+      properties:
+        status:
+          type: string
+        updated_date:
+          type: string
+        _id:
+          type: string
+    OrderDetail_order:
+      type: object
+      properties:
+        _id:
+          type: string
+        userId:
+          type: string
+        ownerId:
+          type: string
+        refModel:
+          type: string
+        expected_delivery_time:
+          type: string
+        deliveryCode:
+          type: string
+        isCod:
+          type: boolean
+        productsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderList_productsList'
+        shippingLogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderDetail_order_shippingLogs'
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    NotificationList_notifications:
+      type: object
+      properties:
+        _id:
+          type: string
+        toUserId:
+          type: string
+        deviceTokenFCM:
+          type: string
+        isRead:
+          type: boolean
+        title:
+          type: string
+        body:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    inline_response_200_2_productsList:
+      type: object
+      properties:
+        quantity:
+          type: number
+        weight:
+          type: number
+        _id:
+          type: string
+    inline_response_200_2_VNPay:
+      type: object
+      properties:
+        vnp_Amount:
+          type: number
+        vnp_BankCode:
+          type: string
+        vnp_BankTranNo:
+          type: string
+        vnp_OrderInfo:
+          type: string
+        vnp_PayDate:
+          type: number
+        vnp_TransactionNo:
+          type: string
+        vnp_CardType:
+          type: string
+        vnp_ResponseCode:
+          type: number
+        vnp_TransactionStatus:
+          type: number
+    inline_response_200_2_order:
+      type: object
+      properties:
+        userId:
+          type: string
+        ownerId:
+          type: string
+        refModel:
+          type: string
+        expected_delivery_time:
+          type: string
+        deliveryCode:
+          type: string
+        productsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/inline_response_200_2_productsList'
+        VNPay:
+          $ref: '#/components/schemas/inline_response_200_2_VNPay'
+        _id:
+          type: string
+        shippingLogs:
+          type: array
+          items:
+            type: object
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    inline_response_200_3_newRequest:
+      type: object
+      properties:
+        requesterId:
+          type: string
+        status:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        shopImage:
+          type: string
+        address:
+          $ref: '#/components/schemas/apiv1userstorerequest_address'
+        _id:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    inline_response_200_10_reviews:
+      type: object
+      properties:
+        _id:
+          type: string
+        reviewerId:
+          type: string
+        productId:
+          type: string
+        content:
+          type: string
+        starPoints:
+          type: number
+        images:
+          type: array
+          items:
+            type: object
+        videos:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    inline_response_200_11_newReview:
+      type: object
+      properties:
+        reviewerId:
+          type: string
+        productId:
+          type: string
+        content:
+          type: string
+        starPoints:
+          type: number
+        images:
+          type: array
+          items:
+            type: string
+        videos:
+          type: array
+          items:
+            type: string
+        _id:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    inline_response_200_12_products:
+      type: object
+      properties:
+        _id:
+          type: string
+        ownerId:
+          type: string
+        thumbnailImage:
+          type: string
+        productName:
+          type: string
+        price:
+          type: string
+        soldCount:
+          type: number
+        condition:
+          type: string
+        isStore:
+          type: boolean
+    inline_response_200_13_newStore:
+      type: object
+      properties:
+        ownerId:
+          type: string
+        displayName:
+          type: string
+        numberOfProduct:
+          type: number
+        rating:
+          type: number
+        followers:
+          type: array
+          items:
+            type: object
+        description:
+          type: string
+        shopImage:
+          type: string
+        address:
+          $ref: '#/components/schemas/apiv1userstorerequest_address'
+        products:
+          type: array
+          items:
+            type: object
+        _id:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+    inline_response_200_14__id:
+      type: object
+      properties:
+        year:
+          type: number
+        month:
+          type: number
+    inline_response_200_14_revenue:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/inline_response_200_14__id'
+        total_monthly_revenue_:
+          type: number
+    inline_response_200_14_topFiveSoldProduct:
+      type: object
+      properties:
+        rating:
+          $ref: '#/components/schemas/CartList_cart_productId_rating'
+        _id:
+          type: string
+        ownerId:
+          type: string
+        thumbnailImage:
+          type: string
+        productName:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: string
+        detailImages:
+          type: array
+          items:
+            type: string
+        video:
+          type: string
+        weight:
+          type: number
+        height:
+          type: number
+        width:
+          type: number
+        length:
+          type: number
+        weightAfterBoxing:
+          type: number
+        heightAfterBoxing:
+          type: number
+        widthAfterBoxing:
+          type: number
+        lengthAfterBoxing:
+          type: number
+        price:
+          type: string
+        numberInStock:
+          type: number
+        peopleFavoriteThisProduct:
+          type: array
+          items:
+            type: object
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+        soldCount:
+          type: number
+        condition:
+          type: string
+        subcategoryId:
+          type: string
+        isStore:
+          type: boolean
+    inline_response_200_15_store:
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/apiv1userstorerequest_address'
+        _id:
+          type: string
+        ownerId:
+          type: string
+        displayName:
+          type: string
+        numberOfProduct:
+          type: number
+        rating:
+          type: number
+        followers:
+          type: array
+          items:
+            type: object
+        description:
+          type: string
+        shopImage:
+          type: string
+        products:
+          type: array
+          items:
+            type: object
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        __v:
+          type: number
+        status:
+          type: string
+    inline_response_200_16_productList:
+      type: object
+      properties:
+        productId:
+          type: string
+        ownerId:
+          type: string
+        weight:
+          type: number
+        height:
+          type: number
+        length:
+          type: number
+        width:
+          type: number
+        quantity:
+          type: number
+        isStore:
+          type: boolean
+    inline_response_200_16_shippingFeeList:
+      type: object
+      properties:
+        storeId:
+          type: string
+        shippingFee:
+          type: number
+        isStore:
+          type: boolean
+        productList:
+          type: array
+          items:
+            $ref: '#/components/schemas/inline_response_200_16_productList'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
