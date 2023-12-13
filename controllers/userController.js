@@ -247,12 +247,13 @@ export const buy = async (req, res, next) => {
     const { userId } = req.user;
     const { isCodQuery } = req.query;
     const productToBuy = req.body;
-    let ipAddress = req.headers['x-forwarded-for'] ||
-        req.connection.remoteAddress ||
-        req.socket.remoteAddress ||
-        req.connection.socket.remoteAddress;
-    if (ipAddress === '::1')
-        ipAddress = '127.0.0.1';
+    const ipAddress = '127.0.0.1';
+    // let ipAddress = req.headers['x-forwarded-for'] ||
+    //     req.connection.remoteAddress ||
+    //     req.socket.remoteAddress ||
+    //     req.connection.socket.remoteAddress;
+    // if (ipAddress === '::1')
+    //     ipAddress = '127.0.0.1';
     try {
         let isCod;
         if (isCodQuery === 'true')

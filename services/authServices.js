@@ -79,7 +79,7 @@ export const forgotPasswordService = async (email) => {
         to: email,
         from: 'hungofhydra@gmail.com',
         subject: 'Reset Password Email',
-        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><a href="http://192.168.1.202:5000/api/v1/auth/resetpassword/${forgotPasswordToken}">Reset Password</a></body></html>`,
+        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><a href="http://192.168.1.202:3000/api/v1/auth/resetpassword/${forgotPasswordToken}">Reset Password</a></body></html>`,
     };
     try {
         await sgMail.send(msg);

@@ -484,7 +484,7 @@ export const buyService = async (
   vnp_Params = sortObject(vnp_Params);
 
   const signData = qs.stringify(vnp_Params, { encode: false });
-  const hmac = crypto.createHmac('sha512', secretKey);
+  const hmac = crypto.createHmac('HMACSHA512', secretKey);
   const signed = hmac.update(signData, 'utf-8').digest('hex');
   vnp_Params['vnp_SecureHash'] = signed;
   vnpUrl += '?' + qs.stringify(vnp_Params, { encode: false });
