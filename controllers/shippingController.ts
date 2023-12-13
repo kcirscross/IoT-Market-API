@@ -1,7 +1,7 @@
 import {
   calculateShippingFeeService,
   trackingShippingService,
-} from '../services/shippingServices.js';
+} from "../services/shippingServices.js";
 
 export const calculateShippingFee = async (req, res, next) => {
   const { userId }: { userId: string } = req.user;

@@ -8,7 +8,7 @@ export const calculateShippingFee = async (req, res, next) => {
             res.status(200).json(order);
     }
     catch (err) {
-        next(err);
+      next(err);
     }
 };
 export const trackingShipping = async (req, res, next) => {

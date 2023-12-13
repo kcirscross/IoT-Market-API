@@ -10,7 +10,7 @@ import { notFoundMiddleware, errorHandlerMiddleware, } from './middlewares/index
 import { authRouter, userRouter, reviewRouter, productRouter, adminRouter, categoryRouter, storeRouter, subcategoryRouter, orderRouter, shippingRouter, notiRouter, } from './routes/index.js';
 dontenv.config();
 const swaggerDoc = YAML.load('./swagger.yaml');
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const app = express();
 app.set('trust proxy', 1);
 app.use(cookieParser());

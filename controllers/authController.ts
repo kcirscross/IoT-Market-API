@@ -38,7 +38,6 @@ export const signUp = async (req, res, next) => {
 export const signIn = async (req, res, next) => {
   const { email, password }: { email: string; password: string } = req.body;
   const { devicetokenfcm }: { devicetokenfcm: string } = req.headers;
-  console.log(devicetokenfcm);
   try {
     const { token, userResult } = await signInService(
       email,
