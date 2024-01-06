@@ -77,7 +77,7 @@ export const forgotPasswordService = async (email) => {
     const forgotPasswordToken = user.createPasswordToken();
     const msg = {
         to: email,
-        from: 'hungofhydra@gmail.com',
+        from: 'tnadung.19it3@vku.udn.vn',
         subject: 'Reset Password Email',
         html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><a href="http://192.168.1.202:3000/api/v1/auth/resetpassword/${forgotPasswordToken}">Reset Password</a></body></html>`,
     };
@@ -101,7 +101,7 @@ export const resetPasswordServices = async (userId, email, passwordToken) => {
         createError(404, `No user with id ${userId}`);
     const msg = {
         to: email,
-        from: 'hungofhydra@gmail.com',
+        from: 'tnadung.19it3@vku.udn.vn',
         subject: 'New Password',
         html: `Your new password is: ${newPassword}`,
     };

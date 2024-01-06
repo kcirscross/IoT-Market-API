@@ -49,7 +49,7 @@ paths:
             schema:
               $ref: '#/components/schemas/UserLogin'
             example:
-              email: hungofhydra@gmail.com
+              email: tnadung.19it3@vku.udn.vn
               password: Hung9090
         required: true
       responses:
@@ -73,7 +73,7 @@ paths:
                     accountOwner: ""
                     accountNumber: ""
                   _id: 632d51b6f9373765b2c3579c
-                  email: hungofhydra@gmail.com
+                  email: tnadung.19it3@vku.udn.vn
                   fullName: Nguyễn Tấn Hùng
                   phoneNumber: "0981856405"
                   gender: Male
@@ -579,7 +579,7 @@ paths:
                     accountOwner: Nguyyễn Tấn Hùng
                     accountNumber: "0981856401"
                   _id: 633501184a1cdc4dc25695a4
-                  email: hungofhydra@gmail.com
+                  email: tnadung.19it3@vku.udn.vn
                   fullName: Nguyễn Tấn Hùng
                   phoneNumber: ""
                   gender: Male
@@ -3334,7 +3334,7 @@ components:
         email:
           type: string
       example:
-        email: hungofhydra@gmail.com
+        email: tnadung.19it3@vku.udn.vn
     inline_response_200:
       type: object
       properties:
@@ -3350,7 +3350,7 @@ components:
         email:
           type: string
       example:
-        email: hungofhydra@gmail.com
+        email: tnadung.19it3@vku.udn.vn
     inline_response_200_1:
       type: object
       properties:
