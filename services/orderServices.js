@@ -9,6 +9,7 @@ import { updateProductQuantityAfterBuyingServices } from "./productServices.js";
 import { trackingShippingService } from "./shippingServices.js";
 import { createError } from "../errors/errors.js";
 import { sendNotificationToOneDeviceService } from "./notiServices.js";
+import Store from "../models/Store.js";
 export const createOrderServices = async (paymentData) => {
   const messageDataForStore = {
     notification: {
@@ -19,6 +20,7 @@ export const createOrderServices = async (paymentData) => {
       route: "Order",
     },
   };
+
   const messageDataForUser = {
     notification: {
       title: "Payment success",
@@ -28,22 +30,27 @@ export const createOrderServices = async (paymentData) => {
       route: "Order",
     },
   };
+
   if (paymentData.vnp_ResponseCode != 0)
     throw createError(400, "Payment not success");
   const secureHash = paymentData.vnp_SecureHash;
   const secretKey = process.env.vnp_HashSecret;
   delete paymentData.vnp_SecureHash;
   delete paymentData.vnp_SecureHashType;
+
   paymentData = sortObject(paymentData);
+
   const signData = qs.stringify(paymentData, { encode: false });
   const hmac = crypto.createHmac("sha512", secretKey);
   const signed = hmac.update(signData, "utf-8").digest("hex");
+
   if (secureHash === signed) {
     const userId = paymentData.vnp_OrderInfo.split("_")[0];
     const shippingId = paymentData.vnp_OrderInfo.split("_")[1];
     await sendNotificationToOneDeviceService(messageDataForUser, userId);
     const shipping = await Shipping.findById({ _id: shippingId });
     const user = await User.findById({ _id: userId });
+
     const orders = Promise.all(
       shipping.shippingFeeList.map(async (shippingFee) => {
         const items = shippingFee.productList.map((item) => {
@@ -53,7 +60,17 @@ export const createOrderServices = async (paymentData) => {
             weight: Math.round(item.weight),
           };
         });
+
         await updateProductQuantityAfterBuyingServices(items);
+
+        const seller = shipping.shippingFeeList[0].isStore
+          ? await Store.findById({
+              _id: shipping.shippingFeeList[0].storeId,
+            })
+          : await User.findById({
+              _id: shipping.shippingFeeList[0].storeId,
+            });
+
         const createdOrderToVPN = await axios({
           url: `${process.env.ghn_Url}/v2/shipping-order/create`,
           method: "post",
@@ -69,10 +86,10 @@ export const createOrderServices = async (paymentData) => {
             to_ward_name: user.address.ward,
             to_district_name: user.address.district,
             to_province_name: user.address.city,
-            from_address: "72 Thành Thái, Phường 14, Quận 10, Hồ Chí Minh, Vietnam",
-            from_ward_name: "Phường 14",
-            from_district_name: "Quận 10",
-            from_province_name: "HCM",
+            from_address: seller.address.street,
+            from_ward_name: seller.address.ward,
+            from_district_name: seller.address.district,
+            from_province_name: seller.address.city,
             weight: Math.round(shippingFee.totalSize.weight),
             length: Math.round(shippingFee.totalSize.length),
             width: Math.round(shippingFee.totalSize.width),
